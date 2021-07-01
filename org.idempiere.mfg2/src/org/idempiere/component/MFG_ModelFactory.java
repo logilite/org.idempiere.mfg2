@@ -92,6 +92,8 @@ public class MFG_ModelFactory implements IModelFactory {
 			     return MOrder.class;
 		   } else if (tableName.equals(LiberoMovementLine.Table_Name)){
 			   return LiberoMovementLine.class;
+		   }  else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)){
+			   return MPPOrderBOMLineMA.class;
 		   } else 	   
 			   return null;
 	}
@@ -174,6 +176,8 @@ public class MFG_ModelFactory implements IModelFactory {
 			     return new MOrder(Env.getCtx(), Record_ID, trxName);
 		   }else if (tableName.equals(LiberoMovementLine.Table_Name)){
 			   return new LiberoMovementLine(Env.getCtx(), Record_ID, trxName);
+		   } else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)){
+			   return new MPPOrderBOMLineMA(Env.getCtx(), Record_ID, trxName);
 		   }
 		   return null;
 	}
@@ -257,6 +261,9 @@ public class MFG_ModelFactory implements IModelFactory {
 
 		   } else if (tableName.equals(MOrder.Table_Name)) {
 			     return new MOrder(Env.getCtx(), rs, trxName);
+
+		   } else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)) {
+			     return new MPPOrderBOMLineMA(Env.getCtx(), rs, trxName);
 
 		   }
 		   return null;
