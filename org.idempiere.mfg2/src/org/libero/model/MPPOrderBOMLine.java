@@ -20,6 +20,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MStorageReservation;
 import org.compiere.model.MUOM;
+import org.compiere.model.MUOMConversion;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
@@ -306,11 +307,25 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 							,COMPONENTTYPE_By_Product
 							,COMPONENTTYPE_Co_Product))
 		{
-			setQtyRequired(qty);
+			BigDecimal qtyrequired = qty;
+			if (getM_Product().getC_UOM_ID() != getC_UOM_ID())
+			{
+				BigDecimal rate = MUOMConversion.getProductRateFrom(getCtx(), getM_Product_ID(), getC_UOM_ID());
+				if (rate == null)
+					throw new AdempiereException("@PP_Product_BOMLine_ID@ @C_UOM_Conversion_ID@ @NotFound@  @M_Product_ID@ "
+							+ getM_Product().getName()
+							+ " @C_UOM_To_ID@ " + getC_UOM().getName());
+
+
+				qtyrequired = qty.multiply(rate);
+			}
+			setQtyRequired(qtyrequired);
+			setQtyEntered(qty);
 		}
 		else if (isComponentType(COMPONENTTYPE_Tools))
 		{
 			setQtyRequired(multiplier);
+			setQtyEntered(multiplier);
 		}
 		else
 		{
@@ -323,6 +338,7 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 		{
 			qtyScrap = qtyScrap.divide(Env.ONEHUNDRED, 8, BigDecimal.ROUND_UP);
 			setQtyRequired(getQtyRequired().divide(Env.ONE.subtract(qtyScrap), 8, BigDecimal.ROUND_HALF_UP));
+			setQtyEntered(getQtyEntered().divide(Env.ONE.subtract(qtyScrap), 8, BigDecimal.ROUND_HALF_UP));
 		}
 	}
 	
