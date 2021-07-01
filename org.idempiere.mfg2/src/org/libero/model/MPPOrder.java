@@ -56,12 +56,11 @@ import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
 import org.eevolution.model.X_PP_Order;
 import org.libero.exceptions.BOMExpiredException;
-import org.libero.exceptions.RoutingExpiredException; 
+import org.libero.exceptions.RoutingExpiredException;
 import org.libero.tables.I_PP_Order_BOMLine;
-import org.libero.tables.I_PP_Order_Node; 
+import org.libero.tables.I_PP_Order_Node;
 import org.libero.tables.X_PP_Order_Node_Asset;
 import org.libero.tables.X_PP_Order_Node_Product;
-import org.libero.model.MRequisition;
 /**
  *  PP Order Model.
  *
@@ -617,13 +616,11 @@ public class MPPOrder extends X_PP_Order implements DocAction
 			return ;
 		}
 		BigDecimal ordered = difference;
-		
-		int M_Locator_ID = getM_Locator_ID(ordered);
 		// Necessary to clear order quantities when called from closeIt - 4Layers
 		if (DOCACTION_Close.equals(getDocAction()))
 		{
-			if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(), M_Locator_ID,
-					getM_Product_ID(), getM_AttributeSetInstance_ID(), ordered, get_TrxName()))
+			if (!MStorageReservation.add (getCtx(), getM_Warehouse_ID(), getM_Product_ID(), 
+					getM_AttributeSetInstance_ID(), ordered, false, get_TrxName()))
 			{
 				throw new AdempiereException();
 			}
@@ -631,8 +628,8 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		else
 		{
 			//	Update Storage
-			if (!MStorageOnHand.add(getCtx(), getM_Warehouse_ID(), M_Locator_ID,
-					getM_Product_ID(), getM_AttributeSetInstance_ID(), ordered, get_TrxName()))
+			if (!MStorageReservation.add(getCtx(), getM_Warehouse_ID(), getM_Product_ID(), 
+					getM_AttributeSetInstance_ID(), ordered, false, get_TrxName()))
 			{
 				throw new AdempiereException();
 			}
@@ -714,6 +711,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		
 		createStandardCosts();
 				
+		//TODO verify this
 		//Create the Activity Control
 		autoReportActivities();
 
