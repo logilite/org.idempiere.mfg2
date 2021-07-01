@@ -38,6 +38,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.eevolution.model.I_PP_Product_BOM;
 import org.eevolution.model.MPPProductBOMLine;
 import org.libero.model.MPPOrder;
 import org.libero.model.MPPOrderBOMLine;
@@ -341,6 +342,13 @@ public class OrderReceiptIssue extends GenForm {
 		// reset table
 		int row = 0;
 		issue.setRowCount(row);
+		MPPOrder ppOrder = getPP_Order();
+		I_PP_Product_BOM bom = ppOrder.getPP_Product_BOM();
+		BigDecimal FGRate = BigDecimal.ONE;
+		if(bom.getC_UOM_ID()!=bom.getM_Product().getC_UOM_ID())
+		{
+			FGRate = MUOMConversion.getProductRateTo(Env.getCtx(), bom.getM_Product_ID(), bom.getC_UOM_ID());
+		}
 		// Execute
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -371,6 +379,7 @@ public class OrderReceiptIssue extends GenForm {
 				BigDecimal componentQtyReq = Env.ZERO;
 				BigDecimal componentQtyToDel = Env.ZERO;
 				
+				toDeliverQty =toDeliverQty.multiply(FGRate);
 				int prodUOM_ID = rs.getInt(6);
 				int OBLUOM_ID = rs.getInt(21);
 				int M_Product_ID = rs.getInt(4);

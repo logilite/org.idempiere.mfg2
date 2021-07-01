@@ -34,6 +34,7 @@ import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MStorageReservation;
 import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
+import org.compiere.model.MUOMConversion;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.ModelValidator;
@@ -52,6 +53,7 @@ import org.compiere.wf.MWFNode;
 import org.compiere.wf.MWFNodeNext;
 import org.compiere.wf.MWorkflow;
 import org.eevolution.model.I_PP_Order;
+import org.eevolution.model.I_PP_Product_BOM;
 import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
 import org.eevolution.model.X_PP_Order;
@@ -996,6 +998,11 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		return MProduct.get (getCtx(), getM_Product_ID());
 	}	//	getProduct
 	
+	@Override
+	public I_PP_Product_BOM getPP_Product_BOM() throws RuntimeException {
+		return MPPProductBOM.get(getCtx(), getPP_Product_BOM_ID());
+	}
+	
 	public MPPOrderBOM getMPPOrderBOM()
 	{
 		final String whereClause = MPPOrderBOM.COLUMNNAME_PP_Order_ID+"=?";
@@ -1045,8 +1052,22 @@ public class MPPOrder extends X_PP_Order implements DocAction
 			MPPOrderBOM PP_Order_BOM = new MPPOrderBOM(PP_Product_BOM, getPP_Order_ID(), get_TrxName());
 			PP_Order_BOM.setAD_Org_ID(getAD_Org_ID());
 			PP_Order_BOM.saveEx(get_TrxName());
+			
+			BigDecimal qtyrequired = getQtyEntered();
+			if (getPP_Product_BOM().getC_UOM_ID() != getC_UOM_ID())
+			{
+				BigDecimal rateProduct = MUOMConversion.getProductRateFrom(getCtx(), getM_Product_ID(), getC_UOM_ID());
+				BigDecimal rate= rateProduct.multiply(MUOMConversion.getProductRateTo(getCtx(), getM_Product_ID(), getPP_Product_BOM().getC_UOM_ID()));
+				if (rate == null)
+					throw new AdempiereException("@PP_Product_BOM_ID@ @C_UOM_Conversion_ID@ @NotFound@  @M_Product_ID@ "
+							+ getM_Product().getName()
+							+ " @C_UOM_To_ID@ " + getC_UOM().getName());
 
-			expandBOM(PP_Product_BOM, PP_Order_BOM, getQtyOrdered());
+
+				qtyrequired = getQtyEntered().multiply(rate);
+			}
+			
+			expandBOM(PP_Product_BOM, PP_Order_BOM, qtyrequired);
 		} // end if From / To parent
 		else
 		{
