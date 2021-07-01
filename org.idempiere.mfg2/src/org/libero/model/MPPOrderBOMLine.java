@@ -100,7 +100,8 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 		setScrap(bomLine.getScrap());
 		setValidFrom(bomLine.getValidFrom());
 		setValidTo(bomLine.getValidTo());
-		setBackflushGroup(bomLine.getBackflushGroup());		
+		setBackflushGroup(bomLine.getBackflushGroup());
+		setPP_Product_BOMLine_ID(bomLine.getPP_Product_BOMLine_ID());
 	}
 
 	/**

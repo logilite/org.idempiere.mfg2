@@ -583,4 +583,19 @@ public interface I_PP_Order_BOMLine
 	  * Valid to including this date (last day)
 	  */
 	public Timestamp getValidTo();
+	
+	/** Column name PP_Product_BOMLine_ID */
+    public static final String COLUMNNAME_PP_Product_BOMLine_ID = "PP_Product_BOMLine_ID";
+
+	/** Set BOM Line.
+	  * BOM Line
+	  */
+	public void setPP_Product_BOMLine_ID (int PP_Product_BOMLine_ID);
+
+	/** Get BOM Line.
+	  * BOM Line
+	  */
+	public int getPP_Product_BOMLine_ID();
+
+	public org.eevolution.model.I_PP_Product_BOMLine getPP_Product_BOMLine() throws RuntimeException;
 }
