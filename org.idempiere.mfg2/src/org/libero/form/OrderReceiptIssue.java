@@ -343,12 +343,14 @@ public class OrderReceiptIssue extends GenForm {
 		int row = 0;
 		issue.setRowCount(row);
 		MPPOrder ppOrder = getPP_Order();
+		//TODO replace with PP_Order_BOM
 		I_PP_Product_BOM bom = ppOrder.getPP_Product_BOM();
 		BigDecimal FGRate = BigDecimal.ONE;
 		if(bom.getC_UOM_ID()!=bom.getM_Product().getC_UOM_ID())
-		{
+		{//From order UOM to BOM UOM
 			FGRate = MUOMConversion.getProductRateTo(Env.getCtx(), bom.getM_Product_ID(), bom.getC_UOM_ID());
-		}
+		} 
+		FGRate = FGRate.divide(bom.getQty());
 		// Execute
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

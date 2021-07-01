@@ -286,6 +286,19 @@ public interface I_PP_Order_BOM
 	/** Get Process Now	  */
 	public boolean isProcessing();
 
+    /** Column name Qty */
+    public static final String COLUMNNAME_Qty = "Qty";
+
+	/** Set Quantity.
+	  * Quantity
+	  */
+	public void setQty (BigDecimal Qty);
+
+	/** Get Quantity.
+	  * Quantity
+	  */
+	public BigDecimal getQty();
+
     /** Column name Revision */
     public static final String COLUMNNAME_Revision = "Revision";
 

@@ -1053,7 +1053,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 			PP_Order_BOM.setAD_Org_ID(getAD_Org_ID());
 			PP_Order_BOM.saveEx(get_TrxName());
 			
-			BigDecimal qtyrequired = getQtyEntered();
+			BigDecimal MultiplierComponent = getQtyEntered();
 			if (getPP_Product_BOM().getC_UOM_ID() != getC_UOM_ID())
 			{
 				BigDecimal rateProduct = MUOMConversion.getProductRateFrom(getCtx(), getM_Product_ID(), getC_UOM_ID());
@@ -1064,10 +1064,14 @@ public class MPPOrder extends X_PP_Order implements DocAction
 							+ " @C_UOM_To_ID@ " + getC_UOM().getName());
 
 
-				qtyrequired = getQtyEntered().multiply(rate);
+				MultiplierComponent = getQtyEntered().multiply(rate);
+			}
+			//If BOM specified for each X qty then component required per x qty 
+			if(BigDecimal.ZERO.compareTo(PP_Order_BOM.getQty())<0) {
+				MultiplierComponent = MultiplierComponent.divide(PP_Order_BOM.getQty());
 			}
 			
-			expandBOM(PP_Product_BOM, PP_Order_BOM, qtyrequired);
+			expandBOM(PP_Product_BOM, PP_Order_BOM, MultiplierComponent);
 		} // end if From / To parent
 		else
 		{

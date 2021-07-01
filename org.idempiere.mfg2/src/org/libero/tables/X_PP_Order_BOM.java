@@ -17,11 +17,13 @@
 /** Generated Model - DO NOT CHANGE */
 package org.libero.tables;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.compiere.model.*;
+import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.eevolution.model.I_PP_Order;
 
@@ -34,7 +36,7 @@ public class X_PP_Order_BOM extends PO implements I_PP_Order_BOM, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20130626L;
+	private static final long serialVersionUID = 20210526L;
 
     /** Standard Constructor */
     public X_PP_Order_BOM (Properties ctx, int PP_Order_BOM_ID, String trxName)
@@ -434,6 +436,26 @@ public class X_PP_Order_BOM extends PO implements I_PP_Order_BOM, I_Persistent
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Quantity.
+	@param Qty 
+	Quantity
+	 */
+	public void setQty (BigDecimal Qty)
+	{
+		set_Value (COLUMNNAME_Qty, Qty);
+	}
+	
+	/** Get Quantity.
+		@return Quantity
+	  */
+	public BigDecimal getQty () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Qty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Revision.
