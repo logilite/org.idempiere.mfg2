@@ -44,6 +44,7 @@ import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
 import org.compiere.model.MResource;
 import org.compiere.model.MResourceAssignment;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.X_M_Forecast;
@@ -135,7 +136,7 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 		//Validate BOM
 		if(bom == null && pp != null)
 		{
-				bom = new MPPProductBOM(ol.getCtx(), pp.getPP_Product_BOM_ID(), ol.get_TrxName());
+				bom = (MPPProductBOM)MTable.get(ol.getCtx(), MPPProductBOM.Table_Name).getPO(pp.getPP_Product_BOM_ID(), ol.get_TrxName());
 				if( bom != null
 					&& !MPPProductBOM.BOMTYPE_Make_To_Order.equals(bom.getBOMType())
 					&& !MPPProductBOM.BOMTYPE_Make_To_Kit.equals(bom.getBOMType()) )
@@ -338,7 +339,7 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 		{
 			RoutingService routingService = RoutingServiceFactory.get().getRoutingService(pp.getCtx());
 			
-			MPPOrder order = new MPPOrder(pp.getCtx(), 0 , pp.get_TrxName());
+			MPPOrder order = (MPPOrder)MTable.get(pp.getCtx(), MPPOrder.Table_Name).getPO(0, pp.get_TrxName());
 			order.setAD_Org_ID(pp.getAD_Org_ID());
 			order.setDescription(description);
 			order.setC_OrderLine_ID(C_OrderLine_ID);

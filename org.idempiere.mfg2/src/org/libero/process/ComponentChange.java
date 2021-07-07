@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.FillMandatoryException;
 import org.compiere.model.MRefList;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess; 
@@ -153,7 +154,8 @@ public class ComponentChange extends SvrProcess
 
 	protected void actionAdd(MPPProductBOMLine bomline, int line)
 	{
-		MPPProductBOMLine newbomline = new MPPProductBOMLine(getCtx(), 0, get_TrxName());
+		MPPProductBOMLine newbomline = (MPPProductBOMLine) MTable.get(getCtx(), MPPProductBOMLine.Table_Name).getPO(0,
+				get_TrxName());
 		MPPProductBOMLine.copyValues(bomline, newbomline);
 		newbomline.setIsActive(true);
 		newbomline.setLine(line);

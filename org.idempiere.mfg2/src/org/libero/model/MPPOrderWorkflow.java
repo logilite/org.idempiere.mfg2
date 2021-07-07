@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MClient;
 import org.compiere.model.MDocType;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.util.CCache;
 import org.compiere.util.Env;
@@ -666,7 +667,7 @@ public class MPPOrderWorkflow extends X_PP_Order_Workflow
 	{
 		// TODO: improve caching support
 		if (m_order == null)
-			m_order = new MPPOrder(getCtx(), getPP_Order_ID(), get_TrxName());
+			m_order = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(getPP_Order_ID(), get_TrxName());
 		return m_order;
 	}
 	

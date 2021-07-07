@@ -32,6 +32,7 @@ import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MProduct;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOMConversion;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -291,8 +292,8 @@ public class OrderReceiptIssue extends GenForm {
 				} else if (value != null && isSelected) {
 					PP_Order_BOMLine_ID = (Integer) key.getKey();
 					if (PP_Order_BOMLine_ID > 0) {
-						orderbomLine = new MPPOrderBOMLine(order.getCtx(),
-								PP_Order_BOMLine_ID, order.get_TrxName());
+						orderbomLine = (MPPOrderBOMLine) MTable.get(order.getCtx(), MPPOrderBOMLine.Table_Name)
+								.getPO(PP_Order_BOMLine_ID, order.get_TrxName());
 						M_AttributeSetInstance_ID = orderbomLine
 								.getM_AttributeSetInstance_ID();
 					}
@@ -712,7 +713,7 @@ public class OrderReceiptIssue extends GenForm {
 		}
 		if (m_PP_order == null || m_PP_order.get_ID() != id) {
 
-			m_PP_order = new MPPOrder(Env.getCtx(), id, null);
+			m_PP_order = (MPPOrder)MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(id, null);
 		}
 		return m_PP_order;
 	}

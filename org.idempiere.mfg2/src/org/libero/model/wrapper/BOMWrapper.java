@@ -19,6 +19,7 @@ package org.libero.model.wrapper;
 import java.sql.Timestamp;
 import java.util.Properties;
 
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.eevolution.model.I_PP_Product_BOM;
 import org.eevolution.model.MPPProductBOM;
@@ -70,11 +71,11 @@ public class BOMWrapper extends AbstractPOWrapper {
 		PO po = null;
 		if(BOM_TYPE_PRODUCT.equals(type)) {
 			
-			po = new MPPProductBOM(ctx, id, trxName);
+			po = (MPPProductBOM)MTable.get(ctx, MPPProductBOM.Table_Name).getPO(id, trxName);
 		}
 		else if(BOM_TYPE_ORDER.equals(type)) {
 			
-			po = new MPPOrderBOM(ctx, id, trxName);
+			po = (MPPOrderBOM)MTable.get(ctx, MPPOrderBOM.Table_Name).getPO(id, trxName);
 		}
 		
 		return po;

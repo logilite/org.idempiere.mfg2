@@ -90,7 +90,7 @@ implements ClientProcess
 
 		if (p_IsComplete)
 		{
-			MPPOrder order = new MPPOrder(getCtx(), p_PP_Order_ID, get_TrxName());
+			MPPOrder order = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(p_PP_Order_ID, get_TrxName());
 			if (!order.isAvailable())
 			{
 				throw new AdempiereException("@NoQtyAvailable@");

@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
@@ -94,7 +95,8 @@ public class OrderReceiptIssue extends SvrProcess {
 	}
 
 	private void createReceipt(MPPOrderBOMLine bomline) {
-		MPPOrder mo = new MPPOrder(Env.getCtx(),bomline.getPP_Order_ID(), bomline.get_TrxName());
+		MPPOrder mo = (MPPOrder) MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(bomline.getPP_Order_ID(),
+				bomline.get_TrxName());
 	/*
 	 *  Embargo until InfoWindow can accept row level data input
 	 * 	MPPOrder.createReceipt(mo,
@@ -111,7 +113,8 @@ public class OrderReceiptIssue extends SvrProcess {
 	}
 
 	private void createIssue(MPPOrderBOMLine bomline) { 
-		MPPOrder mo = new MPPOrder(Env.getCtx(),bomline.getPP_Order_ID(), bomline.get_TrxName());
+		MPPOrder mo = (MPPOrder) MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(bomline.getPP_Order_ID(),
+				bomline.get_TrxName());
 		int M_Product_ID = bomline.getM_Product_ID();
 		int PP_Order_BOMLine_ID = bomline.getPP_Order_BOMLine_ID();
 		int M_AttributeSetInstance_ID = bomline.getM_AttributeSetInstance_ID();

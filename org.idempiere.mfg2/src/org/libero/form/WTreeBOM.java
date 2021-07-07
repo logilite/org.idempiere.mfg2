@@ -41,6 +41,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.util.DisplayType;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Language;
@@ -353,7 +354,8 @@ public class WTreeBOM extends TreeBOM implements IFormController, EventListener,
 
 		
 		MProduct M_Product = MProduct.get(getCtx(), bomline.getM_Product_ID());
-		MPPProductBOM bomproduct = new MPPProductBOM(getCtx(), bomline.getPP_Product_BOM_ID(), null);
+		MPPProductBOM bomproduct = (MPPProductBOM) MTable.get(getCtx(), MPPProductBOM.Table_Name)
+				.getPO(bomline.getPP_Product_BOM_ID(), null);
 		DefaultTreeNode parent = new DefaultTreeNode(productSummary(M_Product, false), new ArrayList());
 
 		Vector<Object> line = new Vector<Object>(17);

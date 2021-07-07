@@ -61,6 +61,7 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MProduct;
 import org.compiere.model.MTab;
+import org.compiere.model.MTable;
 import org.compiere.model.MWindow;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -795,7 +796,7 @@ ValueChangeListener,Serializable,WTableModelListener
 		if (m_PP_order == null || m_PP_order.get_ID() != id)
 		{
 			
-			m_PP_order = new MPPOrder(Env.getCtx(), id, null);
+			m_PP_order = (MPPOrder)MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(id, null);
 		}
 		return m_PP_order;
 	}
@@ -894,7 +895,8 @@ ValueChangeListener,Serializable,WTableModelListener
 			Trx.run(new TrxRunnable() {
 				public void run(String trxName)
 				{
-					MPPOrder order = new MPPOrder(Env.getCtx(), getPP_Order_ID(), trxName);
+					MPPOrder order = (MPPOrder) MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(getPP_Order_ID(),
+							trxName);
 					if (isBackflush() || isOnlyIssue()) 
 					{
 						createIssue(order, issue);

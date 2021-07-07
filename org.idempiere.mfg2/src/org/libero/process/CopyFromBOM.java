@@ -19,6 +19,7 @@ package org.libero.process;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.MTable;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
@@ -70,8 +71,10 @@ public class CopyFromBOM extends SvrProcess {
 		if (p_Record_ID == p_PP_Product_BOM_ID)
 			return "";
 
-		MPPProductBOM fromBom = new MPPProductBOM(ctx, p_PP_Product_BOM_ID, get_TrxName());
-		MPPProductBOM toBOM = new MPPProductBOM(ctx, p_Record_ID, get_TrxName());
+		MPPProductBOM fromBom = (MPPProductBOM) MTable.get(ctx, MPPProductBOM.Table_Name).getPO(p_PP_Product_BOM_ID,
+				get_TrxName());
+		MPPProductBOM toBOM = (MPPProductBOM) MTable.get(ctx, MPPProductBOM.Table_Name).getPO(p_Record_ID,
+				get_TrxName());
 		if (toBOM.getLines().length > 0)
 		{
 			throw new AdempiereSystemError("@Error@ Existing BOM Line(s)");
@@ -80,7 +83,8 @@ public class CopyFromBOM extends SvrProcess {
 		MPPProductBOMLine[] frombomlines = fromBom.getLines();
 		for (MPPProductBOMLine frombomline : frombomlines)
 		{
-			MPPProductBOMLine tobomline = new MPPProductBOMLine(ctx, 0, get_TrxName());
+			MPPProductBOMLine tobomline = (MPPProductBOMLine) MTable.get(ctx, MPPProductBOMLine.Table_Name).getPO(0,
+					get_TrxName());
 			MPPProductBOMLine.copyValues(frombomline, tobomline);
 			tobomline.setPP_Product_BOM_ID(toBOM.getPP_Product_BOM_ID());
 			tobomline.save();

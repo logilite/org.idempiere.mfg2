@@ -5,6 +5,7 @@ import org.compiere.model.MAsset;
 import org.compiere.model.MForecastLine;
 import org.compiere.model.MRequest;
 import org.compiere.model.MStatus;
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.POResultSet;
 import org.compiere.model.Query;
@@ -130,7 +131,7 @@ if (PP_ID>0)
 //		 	int wf_id = DB.getSQLValue( trx_fcline.getTrxName(), "SELECT pp.AD_Workflow_ID FROM PP_Product_Planning pp WHERE pp.AD_Client_ID="+fcline.getAD_Client_ID()+" AND  pp.AD_Org_ID="+fcline.getAD_Org_ID()+" AND pp.M_Warehouse_ID="+fcline.getM_Warehouse_ID()+" AND pp.M_Product_ID=?", fcline.getM_Product_ID());
 //		 	int planner_id = DB.getSQLValue( trx_fcline.getTrxName(), "SELECT pp.Planner_ID FROM PP_Product_Planning pp WHERE pp.AD_Client_ID="+fcline.getAD_Client_ID()+" AND  pp.AD_Org_ID="+fcline.getAD_Org_ID()+" AND pp.M_Warehouse_ID="+fcline.getM_Warehouse_ID()+" AND pp.M_Product_ID=?", fcline.getM_Product_ID());
 
-			MPPOrder morder = new MPPOrder(Env.getCtx(),0,  trx_fcline.getTrxName());
+			MPPOrder morder = (MPPOrder)MTable.get(Env.getCtx(), MPPOrder.Table_Name).getPO(0, trx_fcline.getTrxName());
 			morder.addDescription("[created from Forecast])"); 
 			morder.setAD_Org_ID(fcline.getAD_Org_ID());
 			morder.setLine(10);

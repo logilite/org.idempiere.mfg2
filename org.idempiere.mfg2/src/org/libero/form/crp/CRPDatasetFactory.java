@@ -31,6 +31,7 @@ import javax.swing.tree.TreeCellRenderer;
 import org.compiere.model.MProduct;
 import org.compiere.model.MResource;
 import org.compiere.model.MResourceType;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
 import org.compiere.model.MUOMConversion;
 import org.compiere.util.DisplayType;
@@ -124,7 +125,8 @@ public abstract class CRPDatasetFactory extends CRPReasoner implements CRPModel
 		{                        
 			if (docStatus != null)
 			{
-				MPPOrder o = new MPPOrder(node.getCtx(), node.getPP_Order_ID(), node.get_TrxName());
+				MPPOrder o = (MPPOrder) MTable.get(node.getCtx(), MPPOrder.Table_Name).getPO(node.getPP_Order_ID(),
+						node.get_TrxName());
 				if(!o.getDocStatus().equals(docStatus))
 				{
 					continue;

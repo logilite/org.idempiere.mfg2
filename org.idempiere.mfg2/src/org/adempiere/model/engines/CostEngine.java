@@ -30,6 +30,7 @@ import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.model.MTransaction;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
@@ -318,7 +319,8 @@ public class CostEngine
 
 	private MPPCostCollector createVarianceCostCollector(MPPCostCollector cc, String CostCollectorType)
 	{
-		MPPCostCollector ccv = new MPPCostCollector(cc.getCtx(), 0, cc.get_TrxName());
+		MPPCostCollector ccv = (MPPCostCollector) MTable.get(cc.getCtx(), MPPCostCollector.Table_Name).getPO(0,
+				cc.get_TrxName());
 		MPPCostCollector.copyValues(cc, ccv);
 		ccv.setProcessing(false);
 		ccv.setProcessed(false);

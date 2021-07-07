@@ -34,6 +34,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.model.Query;
@@ -305,7 +306,9 @@ public class MFG_Validator extends AbstractEventHandler {
 						{
 							if(oline.getQtyOrdered().compareTo(oline.getQtyDelivered()) >= 0)
 							{	
-								MPPCostCollector cc = new MPPCostCollector(po.getCtx(), oline.getPP_Cost_Collector_ID(), trxName);
+								MPPCostCollector cc = (MPPCostCollector) MTable
+										.get(po.getCtx(), MPPCostCollector.Table_Name)
+										.getPO(oline.getPP_Cost_Collector_ID(), trxName);
 								String docStatus = cc.completeIt();
 								cc.setDocStatus(docStatus);
 								cc.setDocAction(MPPCostCollector.DOCACTION_Close);

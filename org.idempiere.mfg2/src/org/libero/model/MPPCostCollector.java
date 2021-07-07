@@ -41,6 +41,7 @@ import org.compiere.model.MOrderLine;
 import org.compiere.model.MPeriod;
 import org.compiere.model.MProduct;
 import org.compiere.model.MProductPO;
+import org.compiere.model.MTable;
 import org.compiere.model.MTransaction;
 import org.compiere.model.MUOM;
 import org.compiere.model.MWarehouse;
@@ -729,7 +730,7 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 		}
 		if (m_bomLine == null || m_bomLine.get_ID() != id)
 		{
-			m_bomLine = new MPPOrderBOMLine(getCtx(), id, get_TrxName());
+			m_bomLine = (MPPOrderBOMLine)MTable.get(getCtx(), MPPOrderBOMLine.Table_Name).getPO(id, get_TrxName());
 		}
 		m_bomLine.set_TrxName(get_TrxName());
 		return m_bomLine;
@@ -746,7 +747,7 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 		}
 		if (m_order == null || m_order.get_ID() != id)
 		{
-			m_order = new MPPOrder(getCtx(), id, get_TrxName());
+			m_order = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(id, get_TrxName());
 		}
 		return m_order;
 	}

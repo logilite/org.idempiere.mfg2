@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Properties;
 
+import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.eevolution.model.MPPProductBOMLine;
 import org.libero.model.MPPOrderBOMLine; 
@@ -59,11 +60,11 @@ public class BOMLineWrapper extends AbstractPOWrapper {
 		PO po = null;
 		if(BOMWrapper.BOM_TYPE_PRODUCT.equals(type)) {
 			
-			po = new MPPProductBOMLine(ctx, id, trxName);
+			po = (MPPProductBOMLine)MTable.get(ctx, MPPProductBOMLine.Table_Name).getPO(id, trxName);
 		}
 		else if(BOMWrapper.BOM_TYPE_ORDER.equals(type)) {
 			
-			po = new MPPOrderBOMLine(ctx, id, trxName);
+			po = (MPPOrderBOMLine)MTable.get(ctx, MPPOrderBOMLine.Table_Name).getPO(id, trxName);
 		}
 		
 		return po;

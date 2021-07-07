@@ -43,6 +43,7 @@ import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
 import org.compiere.model.MResource;
 import org.compiere.model.MStorageOnHand;
+import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
 import org.compiere.model.POResultSet;
@@ -1068,7 +1069,7 @@ public class MRP extends SvrProcess
 			throw new AdempiereException("@FillMandatory@ @PP_Product_BOM_ID@, @AD_Workflow_ID@ ( @M_Product_ID@="+product.getValue()+")");
 		}
 		
-		MPPOrder order = new MPPOrder(getCtx(), 0, get_TrxName());
+		MPPOrder order = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(0, get_TrxName());
 		order.addDescription("MO generated from MRP");
 		order.setAD_Org_ID(AD_Org_ID);
 		order.setLine(10);

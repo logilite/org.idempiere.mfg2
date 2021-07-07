@@ -19,6 +19,7 @@ import org.compiere.model.MLocator;
 import org.compiere.model.MProduct;
 import org.compiere.model.MStorageOnHand;
 import org.compiere.model.MStorageReservation;
+import org.compiere.model.MTable;
 import org.compiere.model.MUOM;
 import org.compiere.model.MUOMConversion;
 import org.compiere.model.MWarehouse;
@@ -263,7 +264,7 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 		}
 		if (m_parent == null || m_parent.get_ID() != id)
 		{
-			m_parent = new MPPOrder(getCtx(), id, get_TrxName());
+			m_parent = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(id, get_TrxName());
 		}
 		return m_parent;
 	}	//	getParent

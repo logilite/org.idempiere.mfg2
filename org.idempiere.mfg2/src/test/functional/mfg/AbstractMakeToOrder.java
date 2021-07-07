@@ -23,6 +23,7 @@ import org.compiere.model.MBPartner;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProduct;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 import org.compiere.wf.MWorkflow;
@@ -73,7 +74,7 @@ public class AbstractMakeToOrder extends AdempiereTestCase
 		
 		int PP_Product_BOM_ID = MPPProductBOM.getBOMSearchKey(product);
 		if(PP_Product_BOM_ID > 0)
-			bom = new MPPProductBOM(getCtx(), PP_Product_BOM_ID , trxName);
+			bom = (MPPProductBOM)MTable.get(getCtx(), MPPProductBOM.Table_Name).getPO(PP_Product_BOM_ID, trxName);
 		else 
 			throw new AdempiereException("@NotFound@ @PP_ProductBOM_ID@");
 		
@@ -135,7 +136,7 @@ public class AbstractMakeToOrder extends AdempiereTestCase
 	
 	public MPPOrder createPPOrder()
 	{
-		MPPOrder expected = new MPPOrder(getCtx(), 0 , trxName);
+		MPPOrder expected = (MPPOrder)MTable.get(getCtx(), MPPOrder.Table_Name).getPO(0, trxName);
 		expected.setAD_Org_ID(AD_Org_ID);
 		expected.setM_Product_ID(product.getM_Product_ID());
 		expected.setDateOrdered(today);

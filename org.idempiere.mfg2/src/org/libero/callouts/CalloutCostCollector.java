@@ -26,6 +26,7 @@ import org.adempiere.model.GridTabWrapper;
 import org.compiere.model.CalloutEngine;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MTable;
 import org.libero.model.MPPCostCollector;
 import org.libero.model.MPPOrder;
 import org.libero.model.MPPOrderNode;
@@ -48,7 +49,7 @@ public class CalloutCostCollector extends CalloutEngine
 			return "";
 		I_PP_Cost_Collector cc = GridTabWrapper.create(mTab, I_PP_Cost_Collector.class);
 		//
-		MPPOrder pp_order =  new MPPOrder(ctx, PP_Order_ID, null);
+		MPPOrder pp_order =  (MPPOrder)MTable.get(ctx, MPPOrder.Table_Name).getPO(PP_Order_ID, null);
 		MPPCostCollector.setPP_Order(cc, pp_order);
 		//
 		return "";

@@ -155,7 +155,9 @@ public class MPPOrder extends X_PP_Order implements DocAction
 					int PP_Order_BOMLine_ID =  (Integer)key.getKey();
 					if(PP_Order_BOMLine_ID > 0)
 					{
-						MPPOrderBOMLine orderBOMLine  = new MPPOrderBOMLine(order.getCtx(), PP_Order_BOMLine_ID, order.get_TrxName());
+						MPPOrderBOMLine orderBOMLine = (MPPOrderBOMLine) MTable
+								.get(order.getCtx(), MPPOrderBOMLine.Table_Name)
+								.getPO(PP_Order_BOMLine_ID, order.get_TrxName());
 						//Validate if AttributeSet generate instance
 						M_AttributeSetInstance_ID = orderBOMLine.getM_AttributeSetInstance_ID();
 					}
@@ -300,7 +302,8 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		setAD_Workflow_ID(AD_Workflow_ID);
 		setQtyEntered(Env.ONE);
 		setQtyOrdered(Env.ONE);
-		MPPProductBOM bom = new MPPProductBOM(project.getCtx(), PP_Product_BOM_ID, project.get_TrxName());
+		MPPProductBOM bom = (MPPProductBOM) MTable.get(project.getCtx(), MPPProductBOM.Table_Name)
+				.getPO(PP_Product_BOM_ID, project.get_TrxName());
 		MProduct product = MProduct.get(project.getCtx(), bom.getM_Product_ID());
 		setC_UOM_ID(product.getC_UOM_ID());
 		
@@ -1283,7 +1286,8 @@ public class MPPOrder extends X_PP_Order implements DocAction
 	{
 		if (qty.signum() == 0)
 			return;
-		MPPOrderBOMLine PP_orderbomLine = new MPPOrderBOMLine(order.getCtx(), PP_OrderBOMLine_ID, order.get_TrxName());
+		MPPOrderBOMLine PP_orderbomLine = (MPPOrderBOMLine) MTable.get(order.getCtx(), MPPOrderBOMLine.Table_Name)
+				.getPO(PP_OrderBOMLine_ID, order.get_TrxName());
 		BigDecimal toIssue = qty.add(qtyScrap);
 		for (MStorageOnHand storage : storages)
 		{
@@ -1804,7 +1808,8 @@ public class MPPOrder extends X_PP_Order implements DocAction
 				int PP_Order_BOMLine_ID =  (Integer)key.getKey();
 				if(PP_Order_BOMLine_ID > 0)
 				{
-					MPPOrderBOMLine  orderBOMLine = new MPPOrderBOMLine(getCtx(), PP_Order_BOMLine_ID, get_TrxName());
+					MPPOrderBOMLine orderBOMLine = (MPPOrderBOMLine) MTable.get(getCtx(), MPPOrderBOMLine.Table_Name)
+							.getPO(PP_Order_BOMLine_ID, get_TrxName());
 					//Validate if AttributeSet generate instance
 					M_AttributeSetInstance_ID = orderBOMLine.getM_AttributeSetInstance_ID();
 				}
