@@ -54,8 +54,6 @@ public class StorageEngine
 			BigDecimal Qty, 
 			boolean isReversal , 
 			int M_Warehouse_ID, 
-			int o_M_AttributeSetInstance_ID,
-			int o_M_Warehouse_ID,
 			boolean isSOTrx
 		)
 	{	
@@ -72,8 +70,6 @@ public class StorageEngine
 				checkMaterialPolicy(docLine, MovementType, MovementDate, M_Warehouse_ID);
 			}
 			
-			// Reservation ASI
-			int reservationAttributeSetInstance_ID = o_M_AttributeSetInstance_ID;
 			//
 			if (docLine.getM_AttributeSetInstance_ID() == 0)
 			{

@@ -429,8 +429,6 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 						getMovementQty() , 
 						false,											// IsReversal=false
 						getM_Warehouse_ID(), 
-						getPP_Order().getM_AttributeSetInstance_ID(),	// Reservation ASI
-						getPP_Order().getM_Warehouse_ID(),				// Reservation Warehouse
 						false											// IsSOTrx=false
 						);
 			}	//	stock movement
