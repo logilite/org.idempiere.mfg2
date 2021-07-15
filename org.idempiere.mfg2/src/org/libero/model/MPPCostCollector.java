@@ -437,13 +437,30 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 			{
 				//	Update PP Order Line
 				MPPOrderBOMLine obomline = getPP_Order_BOMLine();
-				obomline.setQtyDelivered(obomline.getQtyDelivered().add(getMovementQty()));
+				
+				MPPOrderBOMLineMA obomlineMA = MPPOrderBOMLineMA.get(getCtx(), obomline.getPP_Order_BOMLine_ID(),
+						getM_AttributeSetInstance_ID(), null, null);
+				if (obomlineMA != null)
+				{
+					obomlineMA.setQtyDelivered(obomlineMA.getQtyDelivered().add(getMovementQty()));
+					obomlineMA.saveEx(get_TrxName());
+				}
+				else
+				{
+					// create line ma for asi
+					MPPOrderBOMLineMA bomLineMA = MPPOrderBOMLineMA.addOrCreate(obomline, getM_AttributeSetInstance_ID(), getMovementQty(), null, true);
+					bomLineMA.setQtyDelivered(getMovementQty());
+					bomLineMA.saveEx(get_TrxName());
+				}
+				
 				obomline.setQtyScrap(obomline.getQtyScrap().add(getScrappedQty()));
-				obomline.setQtyReject(obomline.getQtyReject().add(getQtyReject()));  
-				obomline.setDateDelivered(getMovementDate());	//	overwrite=last	
- 				log.fine("OrderLine - Reserved=" + obomline.getQtyReserved() + ", Delivered=" + obomline.getQtyDelivered());				
-				obomline.saveEx(get_TrxName());
-				log.fine("OrderLine -> Reserved="+obomline.getQtyReserved()+", Delivered="+obomline.getQtyDelivered());
+				obomline.setQtyReject(obomline.getQtyReject().add(getQtyReject()));
+				obomline.setDateDelivered(getMovementDate()); // overwrite=last
+				log.fine("OrderLine - Reserved=" + obomline.getQtyReserved() + ", Delivered="
+				  + obomline.getQtyDelivered()); obomline.saveEx(get_TrxName());
+				log.fine("OrderLine -> Reserved=" + obomline.getQtyReserved() +
+				  ", Delivered=" + obomline.getQtyDelivered());
+				 
 			}
 			if (isReceipt())
 			{
@@ -524,13 +541,30 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 		else if (isCostCollectorType(COSTCOLLECTORTYPE_UsegeVariance) && getPP_Order_BOMLine_ID() > 0)
 		{
 			MPPOrderBOMLine obomline = getPP_Order_BOMLine();
-			obomline.setQtyDelivered(obomline.getQtyDelivered().add(getMovementQty()));
+			
+			MPPOrderBOMLineMA obomlineMA = MPPOrderBOMLineMA.get(getCtx(), obomline.getPP_Order_BOMLine_ID(),
+					getM_AttributeSetInstance_ID(), null, null);
+			if (obomlineMA != null)
+			{
+				obomlineMA.setQtyDelivered(obomlineMA.getQtyDelivered().add(getMovementQty()));
+				obomlineMA.saveEx(get_TrxName());
+			}
+			else
+			{
+				// create line ma for asi
+				MPPOrderBOMLineMA bomLineMA = MPPOrderBOMLineMA.addOrCreate(obomline, getM_AttributeSetInstance_ID(), getMovementQty(), null, true);
+				bomLineMA.setQtyDelivered(getMovementQty());
+				bomLineMA.saveEx(get_TrxName());
+			}
+			
 			obomline.setQtyScrap(obomline.getQtyScrap().add(getScrappedQty()));
-			obomline.setQtyReject(obomline.getQtyReject().add(getQtyReject()));  
-			//obomline.setDateDelivered(getMovementDate());	//	overwrite=last	
- 			log.fine("OrderLine - Reserved=" + obomline.getQtyReserved() + ", Delivered=" + obomline.getQtyDelivered());				
-			obomline.saveEx(get_TrxName());
-			log.fine("OrderLine -> Reserved="+obomline.getQtyReserved()+", Delivered="+obomline.getQtyDelivered());
+			obomline.setQtyReject(obomline.getQtyReject().add(getQtyReject())); //
+			obomline.setDateDelivered(getMovementDate()); // // overwrite=last
+			log.fine("OrderLine - Reserved=" + obomline.getQtyReserved() + ", Delivered="
+			  + obomline.getQtyDelivered()); obomline.saveEx(get_TrxName());
+			log.fine("OrderLine -> Reserved=" + obomline.getQtyReserved() +
+			  ", Delivered=" + obomline.getQtyDelivered());
+			 
 			CostEngineFactory.getCostEngine(getAD_Client_ID()).createUsageVariances(this);
 		}
 		//

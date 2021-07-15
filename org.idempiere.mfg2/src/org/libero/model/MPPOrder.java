@@ -701,6 +701,25 @@ public class MPPOrder extends X_PP_Order implements DocAction
 			if (!DocAction.STATUS_InProgress.equals(status))
 				return status;
 		}
+		
+		// check whether qty of manual lineMAs is more than line qty or not
+		MPPOrderBOMLine[] orderBOMLines = getLines();
+		for (MPPOrderBOMLine orderBOMLine : orderBOMLines)
+		{
+			BigDecimal requiredQty = orderBOMLine.getQtyRequired();
+			BigDecimal qtyOnLineMA = MPPOrderBOMLineMA.getManualQty(orderBOMLine.getPP_Order_BOMLine_ID(), null);
+
+			if ((requiredQty.signum() != 0 && qtyOnLineMA.signum() != 0 && requiredQty.signum() != qtyOnLineMA.signum()) // must
+																															// have
+																															// same
+																															// sign
+					|| (qtyOnLineMA.abs().compareTo(requiredQty.abs()) > 0))
+			{ // compare absolute values
+				// More then line qty on attribute tab for line 10
+				m_processMsg = "@Over_Qty_On_Attribute_Tab@ " + orderBOMLine.getLine();
+				return DOCSTATUS_Invalid;
+			}
+		}
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
 		if (m_processMsg != null)

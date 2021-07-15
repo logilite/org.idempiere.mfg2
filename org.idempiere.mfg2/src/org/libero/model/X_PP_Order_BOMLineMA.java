@@ -231,4 +231,44 @@ public class X_PP_Order_BOMLineMA extends PO implements I_PP_Order_BOMLineMA, I_
 	{
 		return (String) get_Value(COLUMNNAME_PP_Order_BOMLineMA_UU);
 	}
+	
+	/** Set Delivered Quantity.
+	@param QtyDelivered 
+	Delivered Quantity
+  */
+public void setQtyDelivered (BigDecimal QtyDelivered)
+{
+	set_Value (COLUMNNAME_QtyDelivered, QtyDelivered);
+}
+
+/** Get Delivered Quantity.
+	@return Delivered Quantity
+  */
+public BigDecimal getQtyDelivered () 
+{
+	BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyDelivered);
+	if (bd == null)
+		 return Env.ZERO;
+	return bd;
+}
+
+/** Set Reserved Quantity.
+	@param QtyReserved 
+	Reserved Quantity
+  */
+public void setQtyReserved (BigDecimal QtyReserved)
+{
+	set_Value (COLUMNNAME_QtyReserved, QtyReserved);
+}
+
+/** Get Reserved Quantity.
+	@return Reserved Quantity
+  */
+public BigDecimal getQtyReserved () 
+{
+	BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyReserved);
+	if (bd == null)
+		 return Env.ZERO;
+	return bd;
+}
 }

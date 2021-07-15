@@ -183,4 +183,30 @@ public interface I_PP_Order_BOMLineMA
 	 * Get Updated By. User who updated this records
 	 */
 	public int getUpdatedBy();
+	
+	/** Column name QtyDelivered */
+    public static final String COLUMNNAME_QtyDelivered = "QtyDelivered";
+
+	/** Set Delivered Quantity.
+	  * Delivered Quantity
+	  */
+	public void setQtyDelivered (BigDecimal QtyDelivered);
+
+	/** Get Delivered Quantity.
+	  * Delivered Quantity
+	  */
+	public BigDecimal getQtyDelivered();
+
+    /** Column name QtyReserved */
+    public static final String COLUMNNAME_QtyReserved = "QtyReserved";
+
+	/** Set Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public void setQtyReserved (BigDecimal QtyReserved);
+
+	/** Get Reserved Quantity.
+	  * Reserved Quantity
+	  */
+	public BigDecimal getQtyReserved();
 }
