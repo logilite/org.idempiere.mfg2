@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.adempiere.model.engines.CostEngineFactory;
+import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
@@ -32,6 +34,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
 import org.compiere.model.Query;
 import org.compiere.util.Env;
+import org.eevolution.model.I_PP_Order;
 import org.libero.model.MPPCostCollector;
 import org.libero.model.RoutingService;
 import org.libero.model.RoutingServiceFactory;
@@ -63,6 +66,8 @@ public class Doc_PPCostCollector extends Doc
 	
 	/** Collector Cost */
 	protected MPPCostCollector m_cc = null;
+	/** Manufacturing Order **/
+	protected I_PP_Order manufacturingOrder = null;
 	
 	/** Routing Service */
 	protected RoutingService m_routingService = null;
@@ -76,6 +81,7 @@ public class Doc_PPCostCollector extends Doc
 	{
 		setC_Currency_ID (NO_CURRENCY);
 		m_cc = (MPPCostCollector)getPO();
+		manufacturingOrder = m_cc.getPP_Order();
 		setDateDoc (m_cc.getMovementDate());
 		setDateAcct(m_cc.getMovementDate());
 		
@@ -113,6 +119,13 @@ public class Doc_PPCostCollector extends Doc
 	{
 		setC_Currency_ID (as.getC_Currency_ID());
 		final ArrayList<Fact> facts = new ArrayList<Fact>();
+		
+		if(m_cc.isReceipt() || m_cc.isIssue()) {
+			MProduct product = m_cc.getM_Product();
+			if (product != null	&& product.isStocked() && !m_cc.isVariance()) {
+				CostEngineFactory.getCostEngine(getAD_Client_ID()).createCostDetail(m_cc, m_cc);
+			}
+		}
 		
 		if(MPPCostCollector.COSTCOLLECTORTYPE_MaterialReceipt.equals(m_cc.getCostCollectorType()))
 		{
@@ -214,7 +227,7 @@ public class Doc_PPCostCollector extends Doc
 		final MProduct product = m_cc.getM_Product();
 		final MAccount credit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
 
-		for (MCostDetail cd : getCostDetails())
+		for (MCostDetail cd : getCostDetails(as))
 		{
 			MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
 			if (m_cc.getMovementQty().signum() != 0)
@@ -264,23 +277,38 @@ public class Doc_PPCostCollector extends Doc
 	protected Fact createComponentIssue(MAcctSchema as)
 	{
 		final Fact fact = new Fact(this, as, Fact.POST_Actual);
-		final MProduct product = m_cc.getM_Product();
-		
-		MAccount debit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
-		MAccount credit = m_line.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
+		BigDecimal totalCost = Env.ZERO;
+				
+		FactLine debitLine = null;
+		FactLine creditLine = null;
+		MAccount workInProcessAccount = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
+		MAccount inventoryAccount = m_line.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 		if(m_cc.isFloorStock())
 		{
-			credit = m_line.getAccount(ProductCost.ACCTTYPE_P_FloorStock, as);
+			inventoryAccount = m_line.getAccount(ProductCost.ACCTTYPE_P_FloorStock, as);
 		}
 
-		for (MCostDetail cd : getCostDetails())
+		for (MCostDetail costDetail : getCostDetails(as))
 		{
-			MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
-			BigDecimal cost = cd.getAmt().negate();
+			BigDecimal absoluteCost = costDetail.getAmt(); //TODO should consider total cost? Multiple cost type support
+			if (absoluteCost.signum() == 0)
+				continue;
+			BigDecimal cost = costDetail.getQty().signum() < 0 ?  absoluteCost.negate() : absoluteCost;
+			if (cost.compareTo(Env.ZERO) == 0)
+				continue;
+
 			if (cost.scale() > as.getStdPrecision())
 				cost = cost.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
-			createLines(element, as, fact, product, debit, credit, cost, m_cc.getMovementQty());
+
+			debitLine = fact.createLine(m_line, workInProcessAccount, as.getC_Currency_ID(),  cost.negate());
+			I_M_CostElement costElement = costDetail.getM_CostElement();
+			String description = manufacturingOrder.getDocumentNo() + " - " + costElement.getName();
+			debitLine.setDescription(description);
+			totalCost = totalCost.add(cost);
 		}
+		String description = manufacturingOrder.getDocumentNo();
+		creditLine = fact.createLine(m_line, inventoryAccount, as.getC_Currency_ID(), totalCost);
+		creditLine.setDescription(description);
 
 		return fact;
 	}
@@ -306,7 +334,7 @@ public class Doc_PPCostCollector extends Doc
 
 		MAccount debit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
 		
-		for (MCostDetail cd : getCostDetails())
+		for (MCostDetail cd : getCostDetails(as))
 		{
 			BigDecimal costs = cd.getAmt();
 			if (costs.signum() == 0)
@@ -327,7 +355,7 @@ public class Doc_PPCostCollector extends Doc
 		MAccount debit = m_line.getAccount(VarianceAcctType, as);
 		MAccount credit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
 
-		for (MCostDetail cd : getCostDetails())
+		for (MCostDetail cd : getCostDetails(as))
 		{
 			MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
 			BigDecimal costs = cd.getAmt().negate();
@@ -356,13 +384,15 @@ public class Doc_PPCostCollector extends Doc
 		return MProduct.get(ctx, M_Product_ID);
 	}
 	
-	private List<MCostDetail> getCostDetails()
+	private List<MCostDetail> getCostDetails(MAcctSchema as)
 	{
+		
 		if (m_costDetails == null)
 		{
-			String whereClause = MCostDetail.COLUMNNAME_PP_Cost_Collector_ID+"=?";
+			String whereClause = MCostDetail.COLUMNNAME_PP_Cost_Collector_ID+"=? AND " 
+					+ MCostDetail.COLUMNNAME_C_AcctSchema_ID + "=? ";
 			m_costDetails = new Query(getCtx(), MCostDetail.Table_Name, whereClause, getTrxName())
-			.setParameters(new Object[]{m_cc.getPP_Cost_Collector_ID()})
+			.setParameters(new Object[]{m_cc.getPP_Cost_Collector_ID(),as.get_ID()})
 			.setOrderBy(MCostDetail.COLUMNNAME_M_CostDetail_ID)
 			.list();
 		}

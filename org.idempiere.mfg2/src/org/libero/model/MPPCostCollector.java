@@ -581,9 +581,9 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 		{
 			; // nothing
 		}
-		//
-		CostEngineFactory.getCostEngine(getAD_Client_ID()).createRateVariances(this);
-		CostEngineFactory.getCostEngine(getAD_Client_ID()).createMethodVariances(this);
+		//DP: Looks bug can't understand purpose here
+		//CostEngineFactory.getCostEngine(getAD_Client_ID()).createRateVariances(this);
+		//CostEngineFactory.getCostEngine(getAD_Client_ID()).createMethodVariances(this);
 
 		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_AFTER_COMPLETE);
 		if (m_processMsg != null)
