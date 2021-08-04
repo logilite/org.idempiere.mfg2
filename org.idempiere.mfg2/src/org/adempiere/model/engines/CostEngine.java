@@ -133,7 +133,7 @@ public class CostEngine
 
 		});
 
-		BigDecimal actualCost = actualCostReference.get();
+		BigDecimal actualCost = actualCostReference.get().negate();
 		whereClause = new StringBuffer();
 		whereClause
 				.append(" EXISTS (SELECT 1 FROM PP_Cost_Collector cc ")
@@ -302,12 +302,12 @@ public class CostEngine
 				else
 				{ //TODO test for Receipt and Issue
 					cd.setDeltaAmt(amt.subtract(cd.getAmt()));
-					cd.setDeltaQty(cc.getMovementQty().subtract(cd.getQty()));
+					cd.setDeltaQty(qty.subtract(cd.getQty()));
 					if (cd.isDelta())
 					{
 						cd.setProcessed(false);
 						cd.setAmt(amt);
-						cd.setQty(cc.getMovementQty());
+						cd.setQty(qty);
 					}
 				}
 				cd.saveEx();

@@ -226,22 +226,40 @@ public class Doc_PPCostCollector extends Doc
 		
 		final MProduct product = m_cc.getM_Product();
 		final MAccount credit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
-
-		for (MCostDetail cd : getCostDetails(as))
+		
+		String costMethod = product.getCostingMethod(as);
+		for (MCostDetail costDetail : getCostDetails(as))
 		{
-			MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
+			MCostElement element = MCostElement.get(getCtx(), costDetail.getM_CostElement_ID());
+			if(MCostElement.COSTELEMENTTYPE_Material.equalsIgnoreCase(element.getCostElementType())){
+				//For material type costing, use appropriate cost only for posting
+				if(!costMethod.equals(element.getCostingMethod())){
+					continue;
+				}
+			}
+			
 			if (m_cc.getMovementQty().signum() != 0)
 			{
+				BigDecimal absoluteCost = costDetail.getAmt();
+				if (absoluteCost.signum() == 0)
+					continue;
+				
 				MAccount debit = m_line.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
-				BigDecimal cost = cd.getAmt(); 
+				BigDecimal cost = costDetail.getQty().signum() < 0 ?  absoluteCost.negate() : absoluteCost;
 				if (cost.scale() > as.getStdPrecision())
 					cost = cost.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
+				if (cost.compareTo(Env.ZERO)== 0)
+					continue;
 				createLines(element, as, fact, product, debit, credit, cost, m_cc.getMovementQty());
 			}
 			if(m_cc.getScrappedQty().signum() != 0)
 			{
+				BigDecimal absoluteCost = costDetail.getPrice().multiply(m_cc.getScrappedQty());
+				if (absoluteCost.signum() == 0)
+					continue;
+				
 				MAccount debit = m_line.getAccount(ProductCost.ACCTTYPE_P_Scrap, as);
-				BigDecimal cost = cd.getPrice().multiply(m_cc.getScrappedQty());
+				BigDecimal cost = costDetail.getQty().signum() < 0 ?  absoluteCost.negate() : absoluteCost;
 				if (cost.scale() > as.getStdPrecision())
 					cost = cost.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
 				createLines(element, as, fact, product, debit, credit, cost, m_cc.getScrappedQty());
@@ -288,8 +306,18 @@ public class Doc_PPCostCollector extends Doc
 			inventoryAccount = m_line.getAccount(ProductCost.ACCTTYPE_P_FloorStock, as);
 		}
 
+		MProduct product = m_line.getProduct();
+		String costMethod = product.getCostingMethod(as);
 		for (MCostDetail costDetail : getCostDetails(as))
 		{
+			MCostElement element = MCostElement.get(getCtx(), costDetail.getM_CostElement_ID());
+			if(MCostElement.COSTELEMENTTYPE_Material.equalsIgnoreCase(element.getCostElementType())){
+				//For material type costing, use appropriate cost only for posting
+				if(!costMethod.equals(element.getCostingMethod())){
+					continue;
+				}
+			}
+			 
 			BigDecimal absoluteCost = costDetail.getAmt(); //TODO should consider total cost? Multiple cost type support
 			if (absoluteCost.signum() == 0)
 				continue;
