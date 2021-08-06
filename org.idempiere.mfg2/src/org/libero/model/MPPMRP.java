@@ -888,7 +888,10 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 		MOrder o = ol.getParent();
 		MDocType dt = MDocType.get(o.getCtx(), o.getC_DocTypeTarget_ID());
 		String DocSubTypeSO = dt.getDocSubTypeSO();
-		if(MDocType.DOCSUBTYPESO_StandardOrder.equals(DocSubTypeSO))
+		MProduct product = (MProduct) ol.getM_Product();
+		if(MDocType.DOCSUBTYPESO_StandardOrder.equals(DocSubTypeSO) && product.isBOM()
+				&& !product.isPurchased() && isProductMakeToOrder(ol.getCtx(), ol.getM_Product_ID(),
+						ol.get_TrxName()))
 		{
 			int res = MPPMRP.createMOMakeTo(mrp,ol, ol.getQtyOrdered());
 			mrp.setS_Resource_ID(res);
@@ -1627,4 +1630,25 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 		return null;
 	}
 
+	//TODO move below method to MPPProductBOM
+	/**
+	 * Is Product Make to Order
+	 * @param ctx
+	 * @param productId
+	 * @param trxName
+     * @return
+     */
+	public static boolean isProductMakeToOrder(Properties ctx,int productId , String trxName) {
+		final String whereClause = MPPProductBOM.COLUMNNAME_BOMType+" IN (?,?)"
+				+" AND "+MPPProductBOM.COLUMNNAME_BOMUse+"=?"
+				+" AND "+MPPProductBOM.COLUMNNAME_M_Product_ID+"=?";
+		return new Query(ctx, MPPProductBOM.Table_Name, whereClause,trxName)
+				.setClient_ID()
+				.setParameters(
+						MPPProductBOM.BOMTYPE_Make_To_Order,
+						MPPProductBOM.BOMTYPE_Make_To_Kit,
+						MPPProductBOM.BOMUSE_Manufacturing,
+						productId)
+				.match();
+	}
 }	//	MPPMRP
