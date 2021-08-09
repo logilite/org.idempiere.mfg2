@@ -87,7 +87,8 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 	{
 		//Remark by Ferry, moveto after checking MPPProductBOM.BOMTYPE_CurrentActive
 		//MPPOrder order = MPPOrder.forC_OrderLine_ID(ol.getCtx(), ol.get_ID(), ol.get_TrxName());
-		
+		if(ol.getM_Product_ID()<=0)
+			return 0;
 		//-->Ferry, checking BOM & Workflow
 		final MProduct product = MProduct.get(ol.getCtx(), ol.getM_Product_ID());
 		
@@ -809,7 +810,10 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 			{
 				for(MOrderLine line : o.getLines())
 				{
-					C_OrderLine(line);
+					//create MRP line if not a charge
+					if(line.getM_Product_ID()>0) {
+						C_OrderLine(line);
+					}
 				}
 			}
 			
@@ -849,6 +853,10 @@ public class MPPMRP extends X_PP_MRP implements DocAction
 	 */
 	public static void C_OrderLine(MOrderLine ol)
 	{ 
+		//create MRP line if not a charge
+		if(ol.getM_Product_ID()<=0)
+			return;
+		
 		//-->Ferry when complete GI, return exception more than one rows 
 		//MPPMRP mrp = getQuery(ol, null, null).firstOnly();
 		boolean isReleased = false;
