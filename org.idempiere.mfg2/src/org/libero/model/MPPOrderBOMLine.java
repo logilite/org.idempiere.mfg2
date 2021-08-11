@@ -533,7 +533,7 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 	/**
 	 * Reserve Inventory for this BOM Line
 	 */
-	protected void reserveStock()
+	public void reserveStock()
 	{
 		final int header_M_Warehouse_ID = getParent().getM_Warehouse_ID();
 
