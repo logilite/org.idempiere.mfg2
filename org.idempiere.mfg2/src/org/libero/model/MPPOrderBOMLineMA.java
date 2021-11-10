@@ -262,7 +262,8 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 				}
 			}
 			BigDecimal diffQty = getMovementQty().subtract(getQtyReserved()).subtract(getQtyDelivered());
-
+			
+			//TODO Check how ASI reservation respected or ASI do not over reserved
 			// create reservation in lineMA asi
 			if (!MStorageReservation.add(getCtx(), orderBOMLine.getM_Warehouse_ID(), orderBOMLine.getM_Product_ID(),
 					getM_AttributeSetInstance_ID(), diffQty, true, get_TrxName()))
@@ -282,18 +283,22 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 	protected boolean afterSave(boolean newRecord, boolean success)
 	{
 		MPPOrderBOMLine orderBOMLine = (MPPOrderBOMLine) getPP_Order_BOMLine();
-
+		boolean isChanged = false;
 		if (is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyDelivered))
 		{
 			BigDecimal totalDeliveredQty = getTotalDeliveredQty(getCtx(), getPP_Order_BOMLine_ID(), null,
 					get_TrxName());
 			orderBOMLine.setQtyDelivered(totalDeliveredQty);
+			isChanged = true;
 		}
 
 		if (is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyReserved))
 		{
 			BigDecimal totalReservedQty = getTotalReservedQty(getCtx(), getPP_Order_BOMLine_ID(), null, get_TrxName());
 			orderBOMLine.setQtyReserved(totalReservedQty);
+			isChanged = true;
+		}
+		if(isChanged) {
 			orderBOMLine.saveEx();
 		}
 		return true;
