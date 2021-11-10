@@ -105,7 +105,8 @@ public class CostEngine
 			return roundCost(price, as.getC_AcctSchema_ID());
 		} else if(element.isAverageInvoice() || element.isAveragePO()) {
 			BigDecimal price =getParentActualCostByCostType(as,element.get_ID(),cc);
-			return price;
+			int precision = as.getCostingPrecision();
+			return price.divide(cc.getMovementQty(),precision*2,RoundingMode.HALF_UP);
 		}else {
 			throw new AdempiereException("Costing method not supported - "+element.getCostingMethod());
 		}
