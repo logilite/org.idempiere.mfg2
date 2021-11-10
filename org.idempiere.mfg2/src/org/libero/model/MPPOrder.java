@@ -530,9 +530,9 @@ public class MPPOrder extends X_PP_Order implements DocAction
 	} //	processIt
 
 	/**	Process Message 			*/
-	private String m_processMsg = null;
+	protected String m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean m_justPrepared = false;
+	protected boolean m_justPrepared = false;
 
 	public boolean unlockIt()
 	{
@@ -702,6 +702,12 @@ public class MPPOrder extends X_PP_Order implements DocAction
 				return status;
 		}
 		
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
+		if (m_processMsg != null)
+		{
+			return DocAction.STATUS_Invalid;
+		}
+		
 		// check whether qty of manual lineMAs is more than line qty or not
 		MPPOrderBOMLine[] orderBOMLines = getLines();
 		for (MPPOrderBOMLine orderBOMLine : orderBOMLines)
@@ -721,11 +727,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 			}
 		}
 
-		m_processMsg = ModelValidationEngine.get().fireDocValidate(this, ModelValidator.TIMING_BEFORE_COMPLETE);
-		if (m_processMsg != null)
-		{
-			return DocAction.STATUS_Invalid;
-		}
+		
 		
 		//	Implicit Approval
 		if (!isApproved())
@@ -861,6 +863,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 	
 		orderStock(); // Clear Ordered Quantities
 		reserveStock(getLines()); //	Clear Reservations
+		//TODO Do we needs to add cost of Plant?
 		
 		setDocStatus(DOCSTATUS_Closed);
 		//setProcessed(true);
