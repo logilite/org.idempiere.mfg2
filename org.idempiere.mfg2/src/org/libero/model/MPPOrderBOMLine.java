@@ -752,7 +752,7 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 		}
 	}
 
-	private List<SimpleEntry<Integer, BigDecimal>> getAvailableToReseve()
+	protected List<SimpleEntry<Integer, BigDecimal>> getAvailableToReseve()
 	{// TODO Adding this method in core in MStorageReservation class to avoid
 		// duplicatation of code after approval from core
 		boolean FiFo = true;
