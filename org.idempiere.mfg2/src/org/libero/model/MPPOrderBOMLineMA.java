@@ -292,7 +292,7 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 			isChanged = true;
 		}
 
-		if (is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyReserved))
+		if (newRecord || is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyReserved))
 		{
 			BigDecimal totalReservedQty = getTotalReservedQty(getCtx(), getPP_Order_BOMLine_ID(), null, get_TrxName());
 			orderBOMLine.setQtyReserved(totalReservedQty);
