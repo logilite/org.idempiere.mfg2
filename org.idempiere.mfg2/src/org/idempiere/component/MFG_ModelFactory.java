@@ -14,6 +14,8 @@ import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
 import org.eevolution.model.MPPProductPlanning;
 import org.libero.model.*;
+import org.libero.tables.X_PP_BatchCharge;
+import org.libero.tables.X_PP_Order_BatchCharge;
 
 public class MFG_ModelFactory implements IModelFactory {
 
@@ -94,6 +96,10 @@ public class MFG_ModelFactory implements IModelFactory {
 			   return LiberoMovementLine.class;
 		   }  else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)){
 			   return MPPOrderBOMLineMA.class;
+		   } else if (tableName.equals(X_PP_BatchCharge.Table_Name)){
+			   return X_PP_BatchCharge.class;
+		   } else if (tableName.equals(X_PP_Order_BatchCharge.Table_Name)){
+			   return X_PP_Order_BatchCharge.class;
 		   } else 	   
 			   return null;
 	}
@@ -178,6 +184,10 @@ public class MFG_ModelFactory implements IModelFactory {
 			   return new LiberoMovementLine(Env.getCtx(), Record_ID, trxName);
 		   } else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)){
 			   return new MPPOrderBOMLineMA(Env.getCtx(), Record_ID, trxName);
+		   } else if (tableName.equals(X_PP_BatchCharge.Table_Name)){
+			   return new X_PP_BatchCharge(Env.getCtx(), Record_ID, trxName);
+		   } else if (tableName.equals(X_PP_Order_BatchCharge.Table_Name)){
+			   return new X_PP_Order_BatchCharge(Env.getCtx(), Record_ID, trxName);
 		   }
 		   return null;
 	}
@@ -264,6 +274,12 @@ public class MFG_ModelFactory implements IModelFactory {
 
 		   } else if (tableName.equals(MPPOrderBOMLineMA.Table_Name)) {
 			     return new MPPOrderBOMLineMA(Env.getCtx(), rs, trxName);
+
+		   } else if (tableName.equals(X_PP_BatchCharge.Table_Name)) {
+			     return new X_PP_BatchCharge(Env.getCtx(), rs, trxName);
+
+		   } else if (tableName.equals(X_PP_Order_BatchCharge.Table_Name)) {
+			     return new X_PP_Order_BatchCharge(Env.getCtx(), rs, trxName);
 
 		   }
 		   return null;

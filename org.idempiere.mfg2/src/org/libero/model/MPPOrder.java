@@ -21,8 +21,10 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DocTypeNotFoundException;
 import org.adempiere.model.engines.CostDimension;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCharge;
 import org.compiere.model.MClient;
 import org.compiere.model.MCost;
+import org.compiere.model.MCostDetail;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
@@ -61,6 +63,8 @@ import org.libero.exceptions.BOMExpiredException;
 import org.libero.exceptions.RoutingExpiredException;
 import org.libero.tables.I_PP_Order_BOMLine;
 import org.libero.tables.I_PP_Order_Node;
+import org.libero.tables.X_PP_BatchCharge;
+import org.libero.tables.X_PP_Order_BatchCharge;
 import org.libero.tables.X_PP_Order_Node_Asset;
 import org.libero.tables.X_PP_Order_Node_Product;
 /**
@@ -471,7 +475,17 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		
 		if (!newRecord)
 		{
+			if (is_ValueChanged(MPPOrder.COLUMNNAME_QtyEntered))
+			{
+				// recalculate amt in batch charge
+				calculateAmtInBatchCharge();
+			}
+
 			return success;
+		}
+		else
+		{
+			createBatchCharges();
 		}
 		
 		explosion();
@@ -852,6 +866,9 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		//Close all the activity do not reported
 		MPPOrderWorkflow m_order_wf = getMPPOrderWorkflow(); 
 		m_order_wf.closeActivities(m_order_wf.getLastNode(getAD_Client_ID()), getUpdated(),false);
+		
+		// create cost collector for batch charges
+		createCostCollectorForBatchCharges();
 		
 		BigDecimal old = getQtyOrdered();
 		if (old.signum() != 0)
@@ -1861,6 +1878,113 @@ public class MPPOrder extends X_PP_Order implements DocAction
 					getM_AttributeSetInstance_ID());
 			//setQtyDelivered(getQtyOpen());
 			//return DOCSTATUS_Closed;
+		}
+	}
+	
+	/**
+	 * Create Batch Charges from PP_Product_BOM.
+	 */
+	public void createBatchCharges()
+	{
+		List<X_PP_BatchCharge> batchCharges = new Query(getCtx(), X_PP_BatchCharge.Table_Name, "PP_Product_BOM_ID = ?",
+				get_TrxName()).setParameters(getPP_Product_BOM_ID()).list();
+		if (batchCharges != null && batchCharges.size() > 0)
+		{
+			for (X_PP_BatchCharge batchCharge : batchCharges)
+			{
+				X_PP_Order_BatchCharge orderBatchCharge = new X_PP_Order_BatchCharge(getCtx(), 0, get_TrxName());
+				orderBatchCharge.setAD_Org_ID(getAD_Org_ID());
+				orderBatchCharge.setC_Charge_ID(batchCharge.getC_Charge_ID());
+				orderBatchCharge.setPP_MFGChargeMethod(batchCharge.getPP_MFGChargeMethod());
+				orderBatchCharge.setRate(batchCharge.getRate());
+				orderBatchCharge.setPP_Order_ID(getPP_Order_ID());
+				orderBatchCharge.setPP_BatchCharge_ID(batchCharge.getPP_BatchCharge_ID());
+
+				String chargeMethod = batchCharge.getPP_MFGChargeMethod();
+				BigDecimal rate = batchCharge.getRate();
+				BigDecimal amt = Env.ZERO;
+				if (X_PP_Order_BatchCharge.PP_MFGCHARGEMETHOD_BatchSize.equals(chargeMethod))
+				{
+					amt = getQtyEntered().multiply(rate);
+				}
+				else
+				{
+					amt = rate;
+				}
+
+				orderBatchCharge.setAmt(amt);
+				orderBatchCharge.saveEx();
+			}
+		}
+	}
+	
+	/**
+	 * create cost collector for batch charges
+	 */
+	public void createCostCollectorForBatchCharges()
+	{
+		String sql = "SELECT PP_Order_BatchCharge_ID, C_Charge_ID, Amt FROM PP_Order_BatchCharge WHERE PP_Order_ID = ? AND IsActive = 'Y'";
+		List<List<Object>> rowArray = DB.getSQLArrayObjectsEx(get_TrxName(), sql, getPP_Order_ID());
+		if (rowArray != null && rowArray.size() > 0)
+		{
+			for (List<Object> row : rowArray)
+			{
+				int orderBatchChargeId = ((BigDecimal) row.get(0)).intValue();
+				Integer chargeId = ((BigDecimal) row.get(1)).intValue();
+				BigDecimal cost = (BigDecimal) row.get(2);
+
+				MPPCostCollector cc = new MPPCostCollector(this);
+				cc.setPP_Order_BOMLine_ID(0);
+				cc.setPP_Order_Node_ID(0);
+
+				int docTypeId = MDocType.getDocType(MDocType.DOCBASETYPE_ManufacturingCostCollector);
+				cc.setC_DocType_ID(docTypeId);
+				cc.setC_DocTypeTarget_ID(docTypeId);
+				cc.setCostCollectorType(MPPCostCollector.COSTCOLLECTORTYPE_UsegeVariance);
+				cc.setDocAction(MPPCostCollector.DOCACTION_Complete);
+				cc.setDocStatus(MPPCostCollector.DOCSTATUS_Drafted);
+				cc.setIsActive(true);
+				cc.setM_Locator_ID(getM_Locator_ID());
+				cc.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
+				cc.setS_Resource_ID(getS_Resource_ID());
+				cc.setMovementDate(getDateOrdered());
+				cc.setDateAcct(getDateOrdered());
+				cc.setMovementQty(Env.ZERO);
+				cc.setScrappedQty(Env.ZERO);
+				cc.setQtyReject(Env.ZERO);
+				cc.setSetupTimeReal(new BigDecimal(0));
+				cc.setDurationReal(Env.ZERO);
+				cc.setPosted(false);
+				cc.setProcessed(false);
+				cc.setProcessing(false);
+				cc.setUser1_ID(getUser1_ID());
+				cc.setUser2_ID(getUser2_ID());
+				cc.setM_Product_ID(getM_Product_ID());
+
+				cc.set_ValueOfColumn(MCharge.COLUMNNAME_C_Charge_ID, chargeId);
+				cc.set_ValueOfColumn(X_PP_Order_BatchCharge.COLUMNNAME_PP_Order_BatchCharge_ID, orderBatchChargeId);
+				cc.set_ValueOfColumn(MCostDetail.COLUMNNAME_Amt, cost);
+				cc.saveEx(get_TrxName());
+				if (!cc.processIt(MPPCostCollector.DOCACTION_Complete))
+				{
+					throw new AdempiereException(cc.getProcessMsg());
+				}
+				cc.saveEx(get_TrxName());
+			}
+		}
+	}
+	
+	public void calculateAmtInBatchCharge()
+	{
+		X_PP_Order_BatchCharge orderBatchCharge = new Query(getCtx(), X_PP_Order_BatchCharge.Table_Name,
+				"PP_Order_ID = ? AND PP_MFGChargeMethod = ?", get_TrxName())
+						.setParameters(getPP_Order_ID(), X_PP_Order_BatchCharge.PP_MFGCHARGEMETHOD_BatchSize)
+						.setOnlyActiveRecords(true).first();
+		if (orderBatchCharge != null)
+		{
+			BigDecimal rate = orderBatchCharge.getRate();
+			orderBatchCharge.setAmt(getQtyEntered().multiply(rate));
+			orderBatchCharge.saveEx();
 		}
 	}
  
