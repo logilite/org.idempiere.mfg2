@@ -27,6 +27,7 @@ import org.adempiere.model.engines.CostEngineFactory;
 import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCharge;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MDocType;
@@ -119,7 +120,7 @@ public class Doc_PPCostCollector extends Doc
 	{
 		setC_Currency_ID (as.getC_Currency_ID());
 		final ArrayList<Fact> facts = new ArrayList<Fact>();
-		
+		//TODO what if RM has no cost.
 		if(m_cc.isReceipt() || m_cc.isIssue()) {
 			MProduct product = m_cc.getM_Product();
 			if (product != null	&& product.isStocked() && !m_cc.isVariance()) {
@@ -231,6 +232,7 @@ public class Doc_PPCostCollector extends Doc
 		for (MCostDetail costDetail : getCostDetails(as))
 		{
 			MCostElement element = MCostElement.get(getCtx(), costDetail.getM_CostElement_ID());
+			//TODO may needs to drop this check
 			if(MCostElement.COSTELEMENTTYPE_Material.equalsIgnoreCase(element.getCostElementType())){
 				//For material type costing, use appropriate cost only for posting
 				if(!costMethod.equals(element.getCostingMethod())){
@@ -379,18 +381,49 @@ public class Doc_PPCostCollector extends Doc
 	{
 		final Fact fact = new Fact(this, as, Fact.POST_Actual);
 		final MProduct product = m_cc.getM_Product();
-		
-		MAccount debit = m_line.getAccount(VarianceAcctType, as);
+		final int C_Charge_ID = m_cc.get_ValueAsInt(MCharge.COLUMNNAME_C_Charge_ID);
+		MAccount debit;
 		MAccount credit = m_line.getAccount(ProductCost.ACCTTYPE_P_WorkInProcess, as);
+		if(C_Charge_ID>0) {
+			debit = MCharge.getAccount(C_Charge_ID, as);
+			BigDecimal cost = (BigDecimal)m_cc.get_Value(MCostDetail.COLUMNNAME_Amt);
+			if(cost==null)
+				return fact;
+			cost = cost.negate();
+			BigDecimal qty = Env.ONE;
+			
+			FactLine dr = null;
+			FactLine cr = null;
+			if(cost.signum() != 0)
+			{	MCharge charge = MCharge.get(getCtx(), C_Charge_ID);
+				dr = fact.createLine(m_line, debit , as.getC_Currency_ID(), cost, null);
+				dr.setQty(qty);
+				String desc = charge.getName();
+				dr.addDescription(desc);
+				dr.setC_Project_ID(m_cc.getC_Project_ID());
+				dr.setC_Activity_ID(m_cc.getC_Activity_ID());
+				dr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
+				dr.setM_Locator_ID(m_cc.getM_Locator_ID());
 
-		for (MCostDetail cd : getCostDetails(as))
-		{
-			MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
-			BigDecimal costs = cd.getAmt().negate();
-			if (costs.scale() > as.getStdPrecision())
-				costs = costs.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
-			BigDecimal qty = cd.getQty().negate();
-			createLines(element, as, fact, product, debit, credit, costs, qty);
+				cr = fact.createLine(m_line, credit,as.getC_Currency_ID(), null, cost);
+				cr.setQty(qty);
+				cr.addDescription(desc);
+				cr.setC_Project_ID(m_cc.getC_Project_ID());
+				cr.setC_Activity_ID(m_cc.getC_Activity_ID());
+				cr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
+				cr.setM_Locator_ID(m_cc.getM_Locator_ID());
+			}		
+		}else {
+			debit = m_line.getAccount(VarianceAcctType, as);		
+			for (MCostDetail cd : getCostDetails(as))
+			{
+				MCostElement element = MCostElement.get(getCtx(), cd.getM_CostElement_ID());
+				BigDecimal costs = cd.getAmt().negate();
+				if (costs.scale() > as.getStdPrecision())
+					costs = costs.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
+				BigDecimal qty = cd.getQty().negate();
+				createLines(element, as, fact, product, debit, credit, costs, qty);
+			}
 		}
 		return fact;
 	}

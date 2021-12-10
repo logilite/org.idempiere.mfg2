@@ -34,6 +34,7 @@ import org.adempiere.model.engines.IDocumentLine;
 import org.adempiere.model.engines.StorageEngine;
 import org.compiere.model.I_C_UOM;
 import org.compiere.model.MBPartner;
+import org.compiere.model.MCharge;
 import org.compiere.model.MDocType;
 import org.compiere.model.MLocator;
 import org.compiere.model.MOrder;
@@ -576,6 +577,9 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 			activity.setSetupTimeReal(activity.getSetupTimeReal()+getSetupTimeReal().intValueExact());
 			activity.saveEx(get_TrxName());
 			CostEngineFactory.getCostEngine(getAD_Client_ID()).createUsageVariances(this);
+		}
+		else if (isCostCollectorType(COSTCOLLECTORTYPE_UsegeVariance) && get_ValueAsInt(MCharge.COLUMNNAME_C_Charge_ID) > 0) {
+			//No needs to create cost detail for charge
 		}
 		else
 		{

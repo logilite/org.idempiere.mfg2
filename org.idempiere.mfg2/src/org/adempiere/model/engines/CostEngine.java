@@ -28,6 +28,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.I_AD_WF_Node;
 import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MCharge;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
@@ -105,6 +106,10 @@ public class CostEngine
 			return roundCost(price, as.getC_AcctSchema_ID());
 		} else if(element.isAverageInvoice() || element.isAveragePO()) {
 			BigDecimal price =getParentActualCostByCostType(as,element.get_ID(),cc);
+			BigDecimal charges = DB.getSQLValueBD(trxName, "Select sum(Amt) from PP_Cost_Collector where PP_Order_ID=? and docStatus in ('CO','CL')", cc.getPP_Order_ID()); 
+			if(charges!=null)
+				price = price.add(charges);
+			
 			int precision = as.getCostingPrecision();
 			return price.divide(cc.getMovementQty(),precision*2,RoundingMode.HALF_UP);
 		}else {
@@ -504,12 +509,15 @@ public class CostEngine
 		//
 		final MProduct product;
 		final BigDecimal qty;
+		if(ccuv.get_ValueAsInt(MCharge.COLUMNNAME_C_Charge_ID)>0)
+			return;
+					
 		if (ccuv.getPP_Order_BOMLine_ID() > 0)
 		{
 			product = MProduct.get(ccuv.getCtx(), ccuv.getM_Product_ID());
 			qty = ccuv.getMovementQty();
 		}
-		else
+		else 
 		{
 			product = MProduct.forS_Resource_ID(ccuv.getCtx(), ccuv.getS_Resource_ID(), null);
 			final RoutingService routingService = RoutingServiceFactory.get().getRoutingService(ccuv.getAD_Client_ID());
@@ -520,7 +528,7 @@ public class CostEngine
 		{
 			for (MCostElement element : getCostElements(ccuv.getCtx(),ccuv.get_TrxName()))
 			{
-				final BigDecimal price = getProductActualCostPrice(ccuv, product, as, element, ccuv.get_TrxName());
+					final BigDecimal price = getProductActualCostPrice(ccuv, product, as, element, ccuv.get_TrxName());
 				final BigDecimal amt = roundCost(price.multiply(qty), as.getC_AcctSchema_ID());
 				//
 				// Create / Update Cost Detail
