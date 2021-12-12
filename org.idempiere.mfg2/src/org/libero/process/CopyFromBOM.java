@@ -16,16 +16,20 @@
 
 package org.libero.process;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.compiere.model.MTable;
+import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.Env; 
 import org.eevolution.model.MPPProductBOM;
 import org.eevolution.model.MPPProductBOMLine;
+import org.libero.tables.I_PP_BatchCharge;
+import org.libero.tables.X_PP_BatchCharge;
 
 /**
  *	CopyFromBOM Process
@@ -40,6 +44,7 @@ public class CopyFromBOM extends SvrProcess {
 	private int	p_Record_ID = 0;
 	private int p_PP_Product_BOM_ID = 0;
 	private int no = 0;
+	private int cno = 0;
 	private Properties ctx = Env.getCtx();
 
 	/**
@@ -90,12 +95,30 @@ public class CopyFromBOM extends SvrProcess {
 			tobomline.save();
 			++no;
 		}
+		
+		//TODO when adopted in core, make this as getChage on MPPProductBOM
+		//Copy Charge
+		final String whereClause = I_PP_BatchCharge.COLUMNNAME_PP_Product_BOM_ID + "=?";
+		List<X_PP_BatchCharge> chargelines = new Query(getCtx(), X_PP_BatchCharge.Table_Name, whereClause,
+				get_TrxName())
+				.setParameters(new Object[] { fromBom.getPP_Product_BOM_ID() })
+				.setOnlyActiveRecords(true)
+				.setOrderBy(MPPProductBOMLine.COLUMNNAME_Line).list();
+		for(X_PP_BatchCharge fromCharge:chargelines) {
+			X_PP_BatchCharge toCharge = (X_PP_BatchCharge) MTable.get(ctx, X_PP_BatchCharge.Table_Name).getPO(0,
+					get_TrxName());
+			X_PP_BatchCharge.copyValues(fromCharge, toCharge);
+			toCharge.setPP_Product_BOM_ID(toBOM.getPP_Product_BOM_ID());
+			toCharge.save();
+			cno++;
+		}
+		
 		return "OK";
 	}
 	
 	@Override
 	protected void postProcess(boolean success)
 	{
-		this.addLog("@Copied@=" + no);
+		this.addLog("@Copied@ @PP_Product_BOMLine_ID@=" + no + " @PP_BatchCharge_ID@=" + cno);
 	}
 }
