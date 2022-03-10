@@ -935,7 +935,7 @@ public class WMRPDetailed extends MRPDetailed implements IFormController, EventL
 
 			 String dynWhere = getSQLWhere();
 			 if (dynWhere.length() > 0)
-			 {   System.out.println("where" +dynWhere);
+			 {
 			 sql.append(dynWhere);   //  includes first AND
 			 }
 			 String xSql = Msg.parseTranslation(getCtx(), sql.toString());
