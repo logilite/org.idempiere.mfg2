@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.engines.CostEngineFactory;
 import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAccount;
@@ -124,7 +126,13 @@ public class Doc_PPCostCollector extends Doc
 		if(m_cc.isReceipt() || m_cc.isIssue()) {
 			MProduct product = m_cc.getM_Product();
 			if (product != null	&& product.isStocked() && !m_cc.isVariance()) {
-				CostEngineFactory.getCostEngine(getAD_Client_ID()).createCostDetail(m_cc, m_cc);
+				try {
+					CostEngineFactory.getCostEngine(getAD_Client_ID()).createCostDetail(m_cc, m_cc);
+				}catch (AdempiereException e) {
+					p_Error = e.getLocalizedMessage();
+					log.log(Level.WARNING, p_Error);
+					return null;
+				}
 			}
 		}
 		
