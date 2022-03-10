@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.acct.Doc;
 import org.compiere.model.I_AD_WF_Node;
 import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAcctSchema;
@@ -90,7 +91,6 @@ public class CostEngine
 	public BigDecimal getProductActualCostPrice(MPPCostCollector cc, MProduct product, MAcctSchema as, MCostElement element, String trxName)
 	{
 		if(element.isStandardCosting() || !cc.isReceipt()) {
-			//TODO for material receipt, should bring cost sum up
 			CostDimension d = new CostDimension(product,
 					as, as.getM_CostType_ID(),
 					cc.getAD_Org_ID(), //AD_Org_ID,
@@ -98,13 +98,46 @@ public class CostEngine
 					element.getM_CostElement_ID());
 			MCost cost = d.toQuery(MCost.class, trxName).firstOnly();
 			if(cost == null)
-			{	
-				return Env.ZERO;
-				//throw new AdempiereException("@NotFound@ @M_Cost_ID@ - "+as+", "+element); 
+			{	if(!cc.isReceipt()) {
+				//TODO implement case when 0 cost allow, or material is not purchased nor stocked.
+				
+				//1. when valid purchase line or invoice line with 0 cost
+				String sql="SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+						+ " AND AD_Client_ID = ? ";
+				ArrayList<Integer> list = new ArrayList<Integer>();
+				list.add(product.getM_Product_ID());
+				list.add(cc.getAD_Client_ID());
+				
+				String costingLevel = product.getCostingLevel(as);
+				if(MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
+				{
+					sql = "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)"
+						+ " AND AD_Client_ID = ?  AND M_AttributeSetInstance_ID=?";
+					list.add(cc.getM_AttributeSetInstance_ID());
+				}
+				
+				int count = DB.getSQLValue(null,sql,list.toArray());
+				if(count>0)
+					return Env.ZERO;
+				else
+					throw new AdempiereException("@NotFound@ @M_Cost_ID@ - "+as+", "+element); 
+				}else
+					return Env.ZERO;
 			}	
 			BigDecimal price = cost.getCurrentCostPrice().add(cost.getCurrentCostPriceLL());
 			return roundCost(price, as.getC_AcctSchema_ID());
 		} else if(element.isAverageInvoice() || element.isAveragePO()) {
+			List<MPPCostCollector> ccList = new Query(cc.getCtx(), MPPCostCollector.Table_Name,
+					"PP_Order_ID = ? AND Posted != ? and PP_Cost_Collector_ID<>?", cc.get_TrxName())
+							.setParameters(cc.getPP_Order_ID(), Doc.STATUS_Posted,cc.getPP_Cost_Collector_ID()).setOnlyActiveRecords(true)
+							.list();
+			if(ccList.size()>0) {
+				StringBuffer sb = new StringBuffer();
+				for(MPPCostCollector ci:ccList)
+					sb.append(ci.getDocumentNo()).append(",");
+				
+				throw new AdempiereException("Following cost collector are not posted:"+ sb.toString()); 
+			}
 			BigDecimal price =getParentActualCostByCostType(as,element.get_ID(),cc);
 			BigDecimal charges = DB.getSQLValueBD(trxName, "Select sum(Amt) from PP_Cost_Collector where PP_Order_ID=? and docStatus in ('CO','CL')", cc.getPP_Order_ID()); 
 			if(charges!=null)
