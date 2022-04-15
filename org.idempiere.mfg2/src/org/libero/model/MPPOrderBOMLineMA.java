@@ -284,7 +284,8 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 	{
 		MPPOrderBOMLine orderBOMLine = (MPPOrderBOMLine) getPP_Order_BOMLine();
 		boolean isChanged = false;
-		if (is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyDelivered))
+		if ((newRecord && getQtyDelivered().compareTo(Env.ZERO) > 0)
+				|| is_ValueChanged(MPPOrderBOMLineMA.COLUMNNAME_QtyDelivered))
 		{
 			BigDecimal totalDeliveredQty = getTotalDeliveredQty(getCtx(), getPP_Order_BOMLine_ID(), null,
 					get_TrxName());
