@@ -672,6 +672,20 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		}
 	} //	reserveStock
 
+	/**
+	 * Clear reservations
+	 * @param lines
+	 */
+	private void clearReservation(MPPOrderBOMLine[] lines)
+	{
+		//	Always check and (un) Reserve Inventory		
+		for (MPPOrderBOMLine line : lines)
+		{
+			line.clearReservation();
+			line.saveEx(get_TrxName());
+		}	
+	} //	reserveStock
+	
 	public boolean approveIt()
 	{
 		log.info("approveIt - " + toString());
@@ -879,7 +893,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		}	
 	
 		orderStock(); // Clear Ordered Quantities
-		reserveStock(getLines()); //	Clear Reservations
+		clearReservation(getLines()); //	Clear Reservations
 		//TODO Do we needs to add cost of Plant?
 		
 		setDocStatus(DOCSTATUS_Closed);

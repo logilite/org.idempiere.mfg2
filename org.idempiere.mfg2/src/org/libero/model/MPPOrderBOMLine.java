@@ -752,6 +752,43 @@ public class MPPOrderBOMLine extends X_PP_Order_BOMLine
 		}
 	}
 
+	public void clearReservation()
+	{
+
+		// getting line ma
+		
+		MPPOrderBOMLineMA[] orderBOMLineMAList = null;
+		orderBOMLineMAList = MPPOrderBOMLineMA.get(getCtx(), getPP_Order_BOMLine_ID(), null);
+		
+		if (orderBOMLineMAList != null && orderBOMLineMAList.length > 0)
+		{
+			for (MPPOrderBOMLineMA orderBOMLineMA : orderBOMLineMAList)
+			{
+				// getting qty to be released from ma
+				BigDecimal reservedQtyForMA = (BigDecimal) orderBOMLineMA
+						.get_Value(MPPOrderBOMLine.COLUMNNAME_QtyReserved);
+
+				if (reservedQtyForMA.compareTo(Env.ZERO) > 0)
+				{
+					// update line ma for asi
+					MPPOrderBOMLineMA bomLineMA = MPPOrderBOMLineMA.addOrCreate(this,
+							orderBOMLineMA.getM_AttributeSetInstance_ID(), Env.ZERO, null, null);
+					bomLineMA.setQtyReserved(Env.ZERO);
+					bomLineMA.saveEx(get_TrxName());
+
+					if (!MStorageReservation.add(getCtx(), getM_Warehouse_ID(), getM_Product_ID(),
+							orderBOMLineMA.getM_AttributeSetInstance_ID(), reservedQtyForMA.negate(), true, get_TrxName()))
+					{
+						throw new AdempiereException("Storage Update  Error!");
+					}
+
+				}
+				
+			}
+		}
+	}
+
+
 	protected List<SimpleEntry<Integer, BigDecimal>> getAvailableToReseve()
 	{// TODO Adding this method in core in MStorageReservation class to avoid
 		// duplicatation of code after approval from core
