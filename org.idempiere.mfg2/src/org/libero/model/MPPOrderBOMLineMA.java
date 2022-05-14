@@ -262,10 +262,10 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 					orderBOMLine.releaseReservation(qtyToReduce, true);
 				}
 			}
-			BigDecimal qtyRemoveReserved = getQtyDelivered();
-			if(getQtyReserved().compareTo(getQtyDelivered())<0 && getQtyDelivered().compareTo(Env.ZERO)>0)
-					qtyRemoveReserved = getQtyReserved();
-			BigDecimal diffQty = getMovementQty().subtract(getQtyReserved()).subtract(qtyRemoveReserved);
+            BigDecimal diffQty = getMovementQty().subtract(getQtyReserved()).subtract(getQtyDelivered());
+            //If delivered is more then movement, then no reservation required,so remove reservation
+			if(getQtyDelivered().compareTo(getMovementQty())>0 && getQtyDelivered().compareTo(Env.ZERO)>0)
+					diffQty = getQtyReserved().negate();
 			
 			//TODO Check how ASI reservation respected or ASI do not over reserved
 			// create reservation in lineMA asi
