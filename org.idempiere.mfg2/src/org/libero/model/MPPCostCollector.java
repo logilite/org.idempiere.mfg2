@@ -21,6 +21,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
@@ -56,6 +57,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
+import org.compiere.util.Util;
 import org.libero.exceptions.ActivityProcessedException;
 import org.libero.tables.I_PP_Cost_Collector;
 import org.libero.tables.X_PP_Cost_Collector;
@@ -604,7 +606,83 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 //	@Override
 	public boolean voidIt()
 	{
-		return false;
+		if(isIssue() || isReceipt())
+		{
+			boolean isCompleted = false;
+			if(DOCSTATUS_Completed.equals(getDocStatus())) {
+				isCompleted=true;
+				//reverse Stock Movement
+				MProduct product = getM_Product();
+				if (product != null && product.isStocked() && !isVariance())
+				{
+					StorageEngine.createTransaction(this, getMovementType(), getMovementDate(), getMovementQty().negate(), false, // IsReversal=false
+							getM_Warehouse_ID(), false // IsSOTrx=false
+					);
+				} // stock movement
+
+				if (isIssue())
+				{
+					// Update PP Order Line
+					MPPOrderBOMLine obomline = getPP_Order_BOMLine();
+
+					MPPOrderBOMLineMA obomlineMA = MPPOrderBOMLineMA.get(getCtx(), obomline.getPP_Order_BOMLine_ID(),
+							getM_AttributeSetInstance_ID(), null, null);
+					if (obomlineMA != null)
+					{
+						obomlineMA.setQtyDelivered(obomlineMA.getQtyDelivered().add(getMovementQty().negate()));
+						obomlineMA.saveEx(get_TrxName());
+					}
+
+					obomline.setQtyScrap(obomline.getQtyScrap().add(getScrappedQty().negate()));
+					obomline.setQtyReject(obomline.getQtyReject().add(getQtyReject().negate()));
+					//TODO handling rollback date
+					//obomline.setDateDelivered(getMovementDate()); // overwrite=last
+					log.fine("OrderLine - Reserved=" + obomline.getQtyReserved() + ", Delivered="
+							+ obomline.getQtyDelivered());
+					obomline.saveEx(get_TrxName());
+					log.fine("OrderLine -> Reserved=" + obomline.getQtyReserved() + ", Delivered="
+							+ obomline.getQtyDelivered());
+
+				}
+				if (isReceipt())
+				{
+					// Update PP Order Qtys
+					final MPPOrder order = getPP_Order();
+					order.setQtyDelivered(order.getQtyDelivered().add(getMovementQty().negate()));
+					order.setQtyScrap(order.getQtyScrap().add(getScrappedQty().negate()));
+					order.setQtyReject(order.getQtyReject().add(getQtyReject().negate()));
+					//
+					// Update PP Order Dates
+					//order.setDateDelivered(getMovementDate()); // overwrite=last
+					
+					if (order.getQtyOpen().signum() > 0)
+					{
+						order.setDateFinish(null);
+					}
+					order.saveEx(get_TrxName());
+				}
+			}
+			setMovementQty(Env.ZERO);
+			setScrappedQty(Env.ZERO);
+			setQtyReject(Env.ZERO);
+			
+			setDocStatus(DOCSTATUS_Voided);
+			saveEx();
+			if (isCompleted)
+			{//was completed then repost to reverse cost and posting
+				String error = DocumentEngine.postImmediate(Env.getCtx(), getAD_Client_ID(), get_Table_ID(), get_ID(),
+						true, get_TrxName());
+				// forced post via process - throw exception to inform the
+				// caller about the error
+				if (!Util.isEmpty(error))
+				{
+					throw new AdempiereException(error);
+				}}
+		}
+		else		
+			return false;
+		
+		return true;
 	}	//	voidIt
 
 //	@Override
