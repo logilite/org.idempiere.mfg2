@@ -331,7 +331,7 @@ public class Doc_PPCostCollector extends Doc
 			BigDecimal absoluteCost = costDetail.getAmt(); //TODO should consider total cost? Multiple cost type support
 			if (absoluteCost.signum() == 0)
 				continue;
-			BigDecimal cost = costDetail.getQty().signum() < 0 ?  absoluteCost.negate() : absoluteCost;
+			BigDecimal cost =  absoluteCost.negate();
 			if (cost.compareTo(Env.ZERO) == 0)
 				continue;
 

@@ -165,14 +165,10 @@ public class CostEngine
 
 		AtomicReference<BigDecimal> actualCostReference = new AtomicReference<BigDecimal>(BigDecimal.ZERO);
 		componentsIssue.stream().forEach( costDetail ->{
-			if (costDetail.getQty().signum() < 0)
-				actualCostReference.updateAndGet(cost -> cost.subtract(costDetail.getAmt())); //TODO considering AmtLL
-			else
 				actualCostReference.updateAndGet(cost -> cost.add(costDetail.getAmt()));
-
 		});
 
-		BigDecimal actualCost = actualCostReference.get().negate();
+		BigDecimal actualCost = actualCostReference.get();
 		whereClause = new StringBuffer();
 		whereClause
 				.append(" EXISTS (SELECT 1 FROM PP_Cost_Collector cc ")
