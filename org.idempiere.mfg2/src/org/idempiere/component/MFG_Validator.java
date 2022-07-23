@@ -34,6 +34,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MRMALine;
 import org.compiere.model.MRequisition;
 import org.compiere.model.MRequisitionLine;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.PO;
@@ -66,9 +67,15 @@ import org.osgi.service.event.Event;
 public class MFG_Validator extends AbstractEventHandler {
 	private static CLogger log = CLogger.getCLogger(MFG_Validator.class);
 	private String trxName = "";
+	
+	private static final String MRP_ENABLED = "MRP_ENABLED";
 	private PO po = null;
 	@Override
 	protected void initialize() {
+		boolean MRPEnabled = MSysConfig.getBooleanValue(MRP_ENABLED, true);
+		if(!MRPEnabled) {
+			return;
+		}
 		registerEvent(IEventTopics.AFTER_LOGIN);
 		registerTableEvent(IEventTopics.PO_BEFORE_NEW, I_M_Movement.Table_Name);
 		registerTableEvent(IEventTopics.PO_AFTER_NEW, I_C_Order.Table_Name);
