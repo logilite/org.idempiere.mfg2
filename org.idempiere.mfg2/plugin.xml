@@ -156,11 +156,13 @@
       <callout
             class="org.libero.callouts.Callout_PP_Order"
             columnName="QtyEntered"
+            priority="1"
             tableName="PP_Order">
       </callout>
       <callout
             class="org.libero.callouts.Callout_PP_Order"
             columnName="M_Product_ID"
+            priority="1"
             tableName="PP_Order">
       </callout>
       <callout
