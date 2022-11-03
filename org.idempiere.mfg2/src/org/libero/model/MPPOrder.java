@@ -1514,7 +1514,7 @@ public class MPPOrder extends X_PP_Order implements DocAction
 		setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ManufacturingOrder);
 		setC_DocType_ID(getC_DocTypeTarget_ID());
 		setDocStatus(DOCSTATUS_Drafted);
-		setDocAction(DOCACTION_Prepare);	
+		setDocAction(DOCACTION_None);	
 		setC_OrderLine_ID(MPPMRP.C_OrderLine_ID);//red1 harmless DNA for other MRPs from this MO
 	}
 	
