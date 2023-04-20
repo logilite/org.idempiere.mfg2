@@ -256,6 +256,11 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 				// then remove extra qty from auto lineMa				
 
 				BigDecimal totalMovementQty = getTotalMovementQty(getCtx(), getPP_Order_BOMLine_ID(), null, null);
+				if(totalMovementQty == null)
+				{
+					totalMovementQty = Env.ZERO;
+				}
+				
 				BigDecimal qtyToReduce = orderBOMLine.getQtyRequired().subtract(totalMovementQty).subtract(getMovementQty());
 				if (qtyToReduce.signum() == -1)
 				{
@@ -335,10 +340,20 @@ public class MPPOrderBOMLineMA extends X_PP_Order_BOMLineMA
 	{
 		MPPOrderBOMLine orderBOMLine = (MPPOrderBOMLine) getPP_Order_BOMLine();
 		BigDecimal totalDeliveredQty = getTotalDeliveredQty(getCtx(), getPP_Order_BOMLine_ID(), null, get_TrxName());
+		if(totalDeliveredQty == null)
+		{
+			totalDeliveredQty = Env.ZERO;
+		}
 		orderBOMLine.setQtyDelivered(totalDeliveredQty);
 
 		BigDecimal totalReservedQty = getTotalReservedQty(getCtx(), getPP_Order_BOMLine_ID(), null, get_TrxName());
+		if(totalReservedQty == null)
+		{
+			totalReservedQty = Env.ZERO;
+		}
 		orderBOMLine.setQtyReserved(totalReservedQty);
+		
+		orderBOMLine.saveEx();
 		return true;
 	}
 	
