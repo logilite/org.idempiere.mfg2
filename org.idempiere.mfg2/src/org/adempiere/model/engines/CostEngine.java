@@ -35,6 +35,7 @@ import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MProduct;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MTransaction;
 import org.compiere.model.PO;
@@ -55,6 +56,7 @@ import org.libero.tables.I_PP_Order_BOMLine;
  */
 public class CostEngine
 {
+	public static final String PP_COSTCOLLECTOR_COSTAMT_VARIATION_THRESOLD= "PP_COSTCOLLECTOR_COSTAMT_VARIATION_THRESOLD" ;
 	/**	Logger							*/
 	protected transient CLogger	log = CLogger.getCLogger (getClass());
 	
@@ -308,6 +310,7 @@ public class CostEngine
 				//
 				// Create / Update Cost Detail
 				MCostDetail cd = getCostDetail(model, cc ,as, element.get_ID());
+				boolean isCostDetailUpdated = false;
 				if (cd == null)		//	createNew
 				{	
 					cd = new MCostDetail (as, cc.getAD_Org_ID(), 
@@ -317,6 +320,7 @@ public class CostEngine
 							qty,
 							model.getDescription(),
 							cc.get_TrxName());
+					isCostDetailUpdated = true;
 //					cd.setMovementDate(mtrx.getMovementDate());
 //					if (cost != null)
 //					{	
@@ -336,17 +340,36 @@ public class CostEngine
 				}
 				else
 				{ //TODO test for Receipt and Issue
-					cd.setDeltaAmt(amt.subtract(cd.getAmt()));
-					cd.setDeltaQty(qty.subtract(cd.getQty()));
-					if (cd.isDelta())
+					boolean isGoodToIgnoreDelta = false;
+					if(qty.subtract(cd.getQty()).compareTo(Env.ZERO)==0) {
+						CostDimension d = new CostDimension(product,
+								as, as.getM_CostType_ID(),
+								cc.getAD_Org_ID(), //AD_Org_ID,
+								cc.getM_AttributeSetInstance_ID(), //M_ASI_ID,
+								element.getM_CostElement_ID());
+						MCost cost = d.toQuery(MCost.class, cc.get_TrxName()).firstOnly();
+						BigDecimal costVarThresold = BigDecimal.valueOf(MSysConfig.getDoubleValue(PP_COSTCOLLECTOR_COSTAMT_VARIATION_THRESOLD, 0.0,cc.getAD_Client_ID()));
+						if(cost!=null && cost.getCurrentQty().compareTo(Env.ZERO)==0 && amt.subtract(cd.getAmt()).abs().compareTo(costVarThresold)<0)
+							isGoodToIgnoreDelta=true;
+					}
+					if(!isGoodToIgnoreDelta )
 					{
-						cd.setProcessed(false);
-						cd.setAmt(amt);
-						cd.setQty(qty);
+						cd.setDeltaAmt(amt.subtract(cd.getAmt()));
+						cd.setDeltaQty(qty.subtract(cd.getQty()));
+						if (cd.isDelta())
+						{
+							cd.setProcessed(false);
+							cd.setAmt(amt);
+							cd.setQty(qty);
+						}
+						isCostDetailUpdated = true;
 					}
 				}
-				cd.saveEx();
-				processCostDetail(cd);
+				if(isCostDetailUpdated)
+				{
+					cd.saveEx();
+					processCostDetail(cd);
+				}
 				log.config("" + cd);
 			} // for ELements	
 		} // Account Schema 			
