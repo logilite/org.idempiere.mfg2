@@ -123,6 +123,21 @@ public class CostEngine
 					return Env.ZERO;
 				else
 					throw new AdempiereException("@NotFound@ @M_Cost_ID@ - "+as+", "+element); 
+				}else if(element.isStandardCosting() && cc.isReceipt()) {
+					List<MPPCostCollector> ccList = new Query(cc.getCtx(), MPPCostCollector.Table_Name,
+							"PP_Order_ID = ? AND Posted != ? and PP_Cost_Collector_ID<>?", cc.get_TrxName())
+									.setParameters(cc.getPP_Order_ID(), Doc.STATUS_Posted,cc.getPP_Cost_Collector_ID()).setOnlyActiveRecords(true)
+									.list();
+					if(ccList.size()>0) {
+						StringBuffer sb = new StringBuffer();
+						for(MPPCostCollector ci:ccList)
+							sb.append(ci.getDocumentNo()).append(",");
+						
+						throw new AdempiereException("Following cost collector are not posted:"+ sb.toString()); 
+					}
+					BigDecimal price =getParentActualCostByCostType(as,element.get_ID(),cc);
+					int precision = as.getCostingPrecision();
+					return price.divide(cc.getMovementQty(),precision*2,RoundingMode.HALF_UP);
 				}else
 					return Env.ZERO;
 			}	
