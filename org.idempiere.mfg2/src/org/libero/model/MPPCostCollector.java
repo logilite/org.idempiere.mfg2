@@ -21,7 +21,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
@@ -268,18 +267,18 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 	}	//	processIt
 
 	/**	Process Message 			*/
-	private String		m_processMsg = null;
+	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
-	private boolean		m_justPrepared = false;
+	protected boolean		m_justPrepared = false;
 	
 	/** Manufacturing Order **/
-	private MPPOrder m_order = null;
+	protected MPPOrder m_order = null;
 	
 	/** Manufacturing Order Activity **/
-	private MPPOrderNode m_orderNode = null;
+	protected MPPOrderNode m_orderNode = null;
 	
 	/** Manufacturing Order BOM Line **/
-	private MPPOrderBOMLine m_bomLine = null;
+	protected MPPOrderBOMLine m_bomLine = null;
 
 //	@Override
 	public boolean unlockIt()
