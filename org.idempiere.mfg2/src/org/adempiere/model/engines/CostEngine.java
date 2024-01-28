@@ -93,6 +93,14 @@ public class CostEngine
 	public BigDecimal getProductActualCostPrice(MPPCostCollector cc, MProduct product, MAcctSchema as, MCostElement element, String trxName)
 	{
 		if(element.isStandardCosting() || !cc.isReceipt()) {
+			
+			if (!element.getCostingMethod().equals(MAcctSchema.COSTINGMETHOD_StandardCosting))
+			{ //TODO if cost detail exists then return original amount
+				MCostDetail cd = getCostDetail(cc ,as, element.get_ID());
+				if (cd != null)
+					return cd.getPrice().negate();
+			}
+			
 			CostDimension d = new CostDimension(product,
 					as, as.getM_CostType_ID(),
 					cc.getAD_Org_ID(), //AD_Org_ID,
@@ -264,10 +272,10 @@ public class CostEngine
 	 * @param M_AttributeSetInstance_ID
 	 * @return MCostDetail 
 	 */
-	private MCostDetail getCostDetail(IDocumentLine model, MPPCostCollector cc ,MAcctSchema as, int M_CostElement_ID)
+	private MCostDetail getCostDetail(MPPCostCollector cc ,MAcctSchema as, int M_CostElement_ID)
 	{
 		final String whereClause = "AD_Client_ID=? AND AD_Org_ID=?"
-			+" AND "+model.get_TableName()+"_ID=?" 
+			+" AND "+cc.get_TableName()+"_ID=?" 
 			+" AND "+MCostDetail.COLUMNNAME_M_Product_ID+"=?"
 			+" AND "+MCostDetail.COLUMNNAME_M_AttributeSetInstance_ID+"=?"
 			+" AND "+MCostDetail.COLUMNNAME_C_AcctSchema_ID+"=?"
@@ -276,7 +284,7 @@ public class CostEngine
 		final Object[] params = new Object[]{
 				cc.getAD_Client_ID(), 
 				cc.getAD_Org_ID(), 
-				model.get_ID(),
+				cc.get_ID(),
 				cc.getM_Product_ID(),
 				cc.getM_AttributeSetInstance_ID(),
 				as.getC_AcctSchema_ID(),
@@ -324,7 +332,7 @@ public class CostEngine
 				}
 				//
 				// Create / Update Cost Detail
-				MCostDetail cd = getCostDetail(model, cc ,as, element.get_ID());
+				MCostDetail cd = getCostDetail(cc ,as, element.get_ID());
 				boolean isCostDetailUpdated = false;
 				if (cd == null)		//	createNew
 				{	
