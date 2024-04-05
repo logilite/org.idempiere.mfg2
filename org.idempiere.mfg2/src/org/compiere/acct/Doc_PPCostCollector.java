@@ -346,6 +346,9 @@ public class Doc_PPCostCollector extends Doc
 		}
 		String description = manufacturingOrder.getDocumentNo();
 		creditLine = fact.createLine(m_line, inventoryAccount, as.getC_Currency_ID(), totalCost);
+		//For Material issued, qty should set negative
+		if(creditLine.getQty()!=null)
+			creditLine.setQty(creditLine.getQty().negate());
 		if(creditLine!=null)
 			creditLine.setDescription(description);
 
