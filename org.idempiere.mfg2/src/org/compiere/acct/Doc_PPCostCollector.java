@@ -339,6 +339,10 @@ public class Doc_PPCostCollector extends Doc
 				cost = cost.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
 
 			debitLine = fact.createLine(m_line, workInProcessAccount, as.getC_Currency_ID(),  cost.negate());
+			debitLine.setM_Product_ID(manufacturingOrder.getM_Product_ID());
+			//For Material issued, qty should set negative
+			if(debitLine.getQty()!=null)
+				debitLine.setQty(debitLine.getQty().negate());
 			I_M_CostElement costElement = costDetail.getM_CostElement();
 			String description = manufacturingOrder.getDocumentNo() + " - " + costElement.getName();
 			debitLine.setDescription(description);
