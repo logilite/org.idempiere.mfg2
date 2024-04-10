@@ -339,7 +339,9 @@ public class Doc_PPCostCollector extends Doc
 				cost = cost.setScale(as.getStdPrecision(), RoundingMode.HALF_UP);
 
 			debitLine = fact.createLine(m_line, workInProcessAccount, as.getC_Currency_ID(),  cost.negate());
-			debitLine.setM_Product_ID(manufacturingOrder.getM_Product_ID());
+			if(debitLine!=null)
+				debitLine.setM_Product_ID(manufacturingOrder.getM_Product_ID());
+			
 			//For Material issued, qty should set negative
 			if(debitLine.getQty()!=null)
 				debitLine.setQty(debitLine.getQty().negate());
@@ -351,7 +353,7 @@ public class Doc_PPCostCollector extends Doc
 		String description = manufacturingOrder.getDocumentNo();
 		creditLine = fact.createLine(m_line, inventoryAccount, as.getC_Currency_ID(), totalCost);
 		//For Material issued, qty should set negative
-		if(creditLine.getQty()!=null)
+		if(creditLine!=null && creditLine.getQty()!=null)
 			creditLine.setQty(creditLine.getQty().negate());
 		if(creditLine!=null)
 			creditLine.setDescription(description);
