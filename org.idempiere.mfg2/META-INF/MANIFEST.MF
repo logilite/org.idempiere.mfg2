@@ -34,12 +34,14 @@ Export-Package: org.adempiere.model.engines,
  org.libero.form.crp,
  org.libero.form.tree,
  org.libero.model,
+ org.libero.model.impl,
  org.libero.model.reasoner,
  org.libero.model.wrapper,
  org.libero.msg,
  org.libero.process,
  org.libero.tables,
  org.libero.tools.worker
+Eclipse-BuddyPolicy: registered
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
 Bundle-Vendor: E-Evolution, Logilite.com
