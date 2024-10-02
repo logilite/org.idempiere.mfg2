@@ -332,7 +332,7 @@ public class CostEngine
 			//}
 			//TODO test for FG
 			//TODO should we calculate cost for all elements? currently it creating for only product cost detail
-			for (MCostElement element : getCostElements(cc.getCtx(),cc.get_TrxName()))
+			for (MCostElement element : getMaterialCostElements(cc.getCtx(),cc.get_TrxName()))
 			{
 				//
 				//	Delete Unprocessed zero Differences
@@ -453,8 +453,14 @@ public class CostEngine
 		|| MCostElement.COSTELEMENTTYPE_BurdenMOverhead.equals(costElementType);
 	}
 
-	private Collection<MCostElement> getCostElements(Properties ctx,String trxName)
-	{		return new Query(ctx, MCostElement.Table_Name, null, trxName)
+	/**
+	 * Get Material type cost elements
+	 * @param ctx
+	 * @param trxName
+	 * @return
+	 */
+	private Collection<MCostElement> getMaterialCostElements(Properties ctx,String trxName)
+	{		return new Query(ctx, MCostElement.Table_Name, " CostElementType ='M'", trxName)
 				.setClient_ID()
 				.setOnlyActiveRecords(true)
 				.setOrderBy(MCostElement.COLUMNNAME_Created)
@@ -617,7 +623,7 @@ public class CostEngine
 		//
 		for(MAcctSchema as : getAcctSchema(ccuv))
 		{
-			for (MCostElement element : getCostElements(ccuv.getCtx(),ccuv.get_TrxName()))
+			for (MCostElement element : getMaterialCostElements(ccuv.getCtx(),ccuv.get_TrxName()))
 			{
 					final BigDecimal price = getProductActualCostPrice(ccuv, product, as, element, ccuv.get_TrxName());
 				final BigDecimal amt = roundCost(price.multiply(qty), as.getC_AcctSchema_ID());
@@ -659,7 +665,7 @@ public class CostEngine
 		MPPCostCollector costCollectorRateVariance = null; // Cost Collector - Rate Variance
 		for (MAcctSchema as : getAcctSchema(costCollector))
 		{
-			for (MCostElement element : getCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
+			for (MCostElement element : getMaterialCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
 			{
 				final MCostDetail cd = getCostDetail(costCollector, element.getM_CostElement_ID());
 				if (cd == null)
@@ -703,7 +709,7 @@ public class CostEngine
 			for (MAcctSchema as : getAcctSchema(costCollector))
 			{
 				final MProduct product = costCollector.getM_Product();
-				for (MCostElement element : getCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
+				for (MCostElement element : getMaterialCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
 				{
 					final BigDecimal qty = costCollector.getMovementQty();
 					final BigDecimal priceStd = getProductActualCostPrice(costCollector, product, as, element, costCollector.get_TrxName());
@@ -733,7 +739,7 @@ public class CostEngine
 			//TODO debug logic and find out which product's cost use
 			final MProduct resourcePStd = MProduct.forS_Resource_ID(costCollector.getCtx(), std_resource_id, null); 
 			final MProduct resourcePActual = MProduct.forS_Resource_ID(costCollector.getCtx(), actual_resource_id, null);
-			for (MCostElement element : getCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
+			for (MCostElement element : getMaterialCostElements(costCollector.getCtx(),costCollector.get_TrxName()))
 			{
 				final BigDecimal priceStd = getProductActualCostPrice(costCollector, resourcePStd, as, element, costCollector.get_TrxName());
 				final BigDecimal priceActual = getProductActualCostPrice(costCollector, resourcePActual, as, element, costCollector.get_TrxName());
