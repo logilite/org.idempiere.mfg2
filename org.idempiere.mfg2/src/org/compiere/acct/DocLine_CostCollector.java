@@ -12,6 +12,7 @@ import org.compiere.model.MCostElement;
 import org.compiere.model.PO;
 import org.compiere.model.ProductCost; 
 import org.compiere.util.DB;
+import org.compiere.util.Msg;
 import org.libero.tables.I_M_Product_Acct;
 
 /**
