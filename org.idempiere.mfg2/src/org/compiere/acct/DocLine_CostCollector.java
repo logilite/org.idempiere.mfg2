@@ -98,7 +98,7 @@ public class DocLine_CostCollector extends DocLine
 		int validCombination_ID = DB.getSQLValueEx(null, sql, getM_Product_ID(), as.get_ID());
 		if (validCombination_ID  <= 0)
 		{
-			return null;
+			throw new IllegalStateException("No Account defined for: " + Msg.getMsg(as.getCtx(), acctName));
 		}
 		return MAccount.get(as.getCtx(), validCombination_ID);
 	}
