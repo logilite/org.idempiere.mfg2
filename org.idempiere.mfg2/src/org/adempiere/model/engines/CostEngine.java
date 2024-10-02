@@ -560,7 +560,7 @@ public class CostEngine
 		for (MAcctSchema as : getAcctSchema(cc))
 		{
 			//TODO review this, may needs to consider multiple methods
-			for (MCostElement element : MCostElement.getElements(cc.getCtx(), cc.get_TableName()))
+			for (MCostElement element : MCostElement.getElements(cc.getCtx(), cc.get_TrxName()))
 			{
 				if(!element.isActive())
 					continue;
