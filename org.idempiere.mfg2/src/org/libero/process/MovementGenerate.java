@@ -582,6 +582,7 @@ public class MovementGenerate extends SvrProcess
 		move.setSalesRep_ID(order.getSalesRep_ID());
 		//
 		move.setC_Activity_ID(order.getC_Activity_ID());
+		move.setC_Department_ID(order.get_ValueAsInt(MMovement.COLUMNNAME_C_Department_ID));
 		move.setC_Campaign_ID(order.getC_Campaign_ID());
 		move.setC_Charge_ID(order.getC_Charge_ID());
 		move.setChargeAmt(order.getChargeAmt());

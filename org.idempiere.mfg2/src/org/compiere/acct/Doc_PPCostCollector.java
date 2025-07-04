@@ -192,6 +192,7 @@ public class Doc_PPCostCollector extends Doc
 			dr.addDescription(desc);
 			dr.setC_Project_ID(m_cc.getC_Project_ID());
 			dr.setC_Activity_ID(m_cc.getC_Activity_ID());
+			dr.setC_Department_ID(m_cc.getC_Department_ID());
 			dr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
 			dr.setM_Locator_ID(m_cc.getM_Locator_ID());
 
@@ -200,6 +201,7 @@ public class Doc_PPCostCollector extends Doc
 			cr.addDescription(desc);
 			cr.setC_Project_ID(m_cc.getC_Project_ID());
 			cr.setC_Activity_ID(m_cc.getC_Activity_ID());
+			cr.setC_Department_ID(m_cc.getC_Department_ID());
 			cr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
 			cr.setM_Locator_ID(m_cc.getM_Locator_ID());
 		}			
@@ -420,6 +422,7 @@ public class Doc_PPCostCollector extends Doc
 				dr.addDescription(desc);
 				dr.setC_Project_ID(m_cc.getC_Project_ID());
 				dr.setC_Activity_ID(m_cc.getC_Activity_ID());
+				dr.setC_Department_ID(m_cc.getC_Department_ID());
 				dr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
 				dr.setM_Locator_ID(m_cc.getM_Locator_ID());
 
@@ -428,6 +431,7 @@ public class Doc_PPCostCollector extends Doc
 				cr.addDescription(desc);
 				cr.setC_Project_ID(m_cc.getC_Project_ID());
 				cr.setC_Activity_ID(m_cc.getC_Activity_ID());
+				cr.setC_Department_ID(m_cc.getC_Department_ID());
 				cr.setC_Campaign_ID(m_cc.getC_Campaign_ID());
 				cr.setM_Locator_ID(m_cc.getM_Locator_ID());
 			}		

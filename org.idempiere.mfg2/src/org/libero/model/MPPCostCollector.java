@@ -164,6 +164,7 @@ public class MPPCostCollector extends X_PP_Cost_Collector implements DocAction ,
 		cc.setM_Warehouse_ID(order.getM_Warehouse_ID());
 		cc.setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());
 		cc.setC_Activity_ID(order.getC_Activity_ID());
+		cc.setC_Activity_ID(order.get_ValueAsInt(I_PP_Cost_Collector.COLUMNNAME_C_Department_ID));
 		cc.setC_Campaign_ID(order.getC_Campaign_ID());
 		cc.setC_Project_ID(order.getC_Project_ID());
 		cc.setDescription(order.getDescription());
