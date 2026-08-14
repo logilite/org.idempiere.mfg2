@@ -351,7 +351,7 @@ public class OrderReceiptIssue extends GenForm {
 		{//From order UOM to BOM UOM
 			FGRate = MUOMConversion.getProductRateTo(Env.getCtx(), bom.getM_Product_ID(), bom.getC_UOM_ID());
 		} 
-		FGRate = FGRate.divide(bom.getQty());
+		//FGRate = FGRate.divide(bom.getQty());
 		// Execute
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
