@@ -414,7 +414,7 @@ public class CostEngine
 		} // Account Schema 			
 	}
 
-	private int deleteCostDetail(IDocumentLine model, MAcctSchema as ,int M_CostElement_ID,
+	public int deleteCostDetail(IDocumentLine model, MAcctSchema as ,int M_CostElement_ID,
 			int M_AttributeSetInstance_ID)
 	{
 		//	Delete Unprocessed zero Differences

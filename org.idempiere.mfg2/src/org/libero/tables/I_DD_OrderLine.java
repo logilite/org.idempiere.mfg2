@@ -92,6 +92,21 @@ public interface I_DD_OrderLine
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException;
 
+	 /** Column name C_Department_ID */
+   public static final String COLUMNNAME_C_Department_ID = "C_Department_ID";
+
+	/** Set Department.
+	  * Business Department
+	  */
+	public void setC_Department_ID (int C_Department_ID);
+
+	/** Get Department.
+	  * Business Department
+	  */
+	public int getC_Department_ID();
+
+	public org.compiere.model.I_C_Department getC_Department() throws RuntimeException;
+
     /** Column name C_Campaign_ID */
     public static final String COLUMNNAME_C_Campaign_ID = "C_Campaign_ID";
 
