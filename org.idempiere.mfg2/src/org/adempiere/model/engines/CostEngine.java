@@ -352,14 +352,11 @@ public class CostEngine
 				boolean isCostDetailUpdated = false;
 				if (cd == null)		//	createNew
 				{	
-					cd = new MCostDetail (as, cc.getAD_Org_ID(), 
-							cc.getM_Product_ID(), cc.getM_AttributeSetInstance_ID(), 
-							element.get_ID(),
-							amt,
-							qty,
-							model.getDescription(),
-							cc.get_TrxName());
+					cd = new MCostDetail(as, cc.getAD_Org_ID(), cc.getM_Product_ID(), cc.getM_AttributeSetInstance_ID(),
+							element.get_ID(), amt, qty, model.getDescription(), cc.getDateAcct(), 0, cc.get_TrxName());
 					isCostDetailUpdated = true;
+					
+					
 //					cd.setMovementDate(mtrx.getMovementDate());
 //					if (cost != null)
 //					{	
@@ -418,7 +415,7 @@ public class CostEngine
 			int M_AttributeSetInstance_ID)
 	{
 		//	Delete Unprocessed zero Differences
-		String sql = "DELETE " + MCostDetail.Table_Name
+		String sql = "DELETE FROM " + MCostDetail.Table_Name
 		+ " WHERE Processed='N' AND COALESCE(DeltaAmt,0)=0 AND COALESCE(DeltaQty,0)=0"
 		+ " AND "+model.get_TableName()+"_ID=?" 
 		+ " AND "+MCostDetail.COLUMNNAME_C_AcctSchema_ID+"=?" 
@@ -459,12 +456,10 @@ public class CostEngine
 	 * @param trxName
 	 * @return
 	 */
-	private Collection<MCostElement> getMaterialCostElements(Properties ctx,String trxName)
-	{		return new Query(ctx, MCostElement.Table_Name, " CostElementType ='M'", trxName)
-				.setClient_ID()
-				.setOnlyActiveRecords(true)
-				.setOrderBy(MCostElement.COLUMNNAME_Created)
-				.list();
+	private Collection<MCostElement> getMaterialCostElements(Properties ctx, String trxName) {
+		return new Query(ctx, MCostElement.Table_Name, "CostElementType=? AND CostingMethod IS NOT NULL", trxName)
+				.setParameters(MCostElement.COSTELEMENTTYPE_Material).setClient_ID().setOnlyActiveRecords(true)
+				.setOrderBy(MCostElement.COLUMNNAME_Created).list();
 	}
 	
 	private Collection<MAcctSchema> getAcctSchema(PO po)
@@ -588,6 +583,7 @@ public class CostEngine
 						costs.negate(),
 						qty.negate(),
 						"", // Description,
+						cc.getDateAcct(), 0,
 						cc.get_TrxName());
 				cd.setPP_Cost_Collector_ID(cc.getPP_Cost_Collector_ID());
 				cd.saveEx();
