@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.util.logging.Level;
 
 import org.adempiere.base.IDocFactory;
-import org.compiere.acct.Doc;
 import org.compiere.acct.Doc_DDOrder;
 import org.compiere.acct.Doc_PPCostCollector;
 import org.compiere.acct.Doc_PPOrder; 
@@ -14,6 +13,7 @@ import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.idempiere.acct.doc.Doc;
 import org.libero.tables.I_DD_Order;
 import org.libero.tables.I_PP_Cost_Collector; 
 import org.libero.tables.I_PP_Order;

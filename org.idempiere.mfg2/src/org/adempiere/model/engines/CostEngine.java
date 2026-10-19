@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.adempiere.exceptions.AdempiereException;
-import org.compiere.acct.Doc;
 import org.compiere.model.I_AD_WF_Node;
 import org.compiere.model.I_M_CostElement;
 import org.compiere.model.MAcctSchema;
@@ -43,6 +42,7 @@ import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.idempiere.acct.doc.Doc;
 import org.libero.model.MPPCostCollector;
 import org.libero.model.MPPOrderCost;
 import org.libero.model.RoutingService;
